@@ -97,17 +97,69 @@ void MatrixProcess::EnQueue(MatrixQueue * q, QueueNode * node)
 
 QueueNode * MatrixProcess::DeQueue(MatrixQueue * q)
 {
-	return nullptr;
+	if (q == NULL) {
+		cout << "MatrixProcess Dequeue: current queue is NULL!\n";
+		return nullptr;
+	}
+
+	const char *type = q->type == WORKQUEUE ? "work queue" : "free queue";
+	pthread_mutex_t *queue_mutex = ((q->type == WORKQUEUE) ? &workqueue_mutex : &freequeue_mutex);
+	QueueNode *element = NULL;
+
+	pthread_mutex_lock(queue_mutex);
+	element = q->front;
+	if (element == NULL) {
+		pthread_mutex_unlock(queue_mutex);
+		cout << "MatrixProcess Dequeue: the node is NULL\n";
+		return NULL;
+	}
+
+	q->front = q->front->next;
+	q->size--;
+	pthread_mutex_unlock(queue_mutex);
+
+	cout << "MatrixProcess Dequeue: " << type << " size = " << q->size << endl;
+	return element;
 }
 
 void MatrixProcess::ClearMatrixQueue(MatrixQueue * q)
 {
+	while (q->size) {
+		QueueNode *node = this->DeQueue(q);
+		this->FreeNode(node);
+	}
+	cout << "Clear MatrixProcess queue" << endl;
 }
 
 void MatrixProcess::FreeNode(QueueNode * node)
 {
+	if (node != NULL) {
+		free(node->data);
+		free(node);
+	}
 }
 
 void MatrixProcess::ResetFreeQueue(MatrixQueue * workq, MatrixQueue * freeq)
 {
+	if (workq == NULL) {
+		cout << "MatrixProcess ResetFreeQueue: The WorkQueue is NULL!\n";
+		return;
+	}
+
+	if (freeq == NULL) {
+		cout << "MatrixProcess ResetFreeQueue: The FreeQueue is NULL!\n";
+		return;
+	}
+
+	int workQueueSize = workq->size;
+	if (workQueueSize > 0) {
+		for (int i = 0; i < workQueueSize; i++) {
+			QueueNode *node = DeQueue(workq);
+			free(node->data);
+			node->data = NULL;
+			EnQueue(freeq, node);
+		}
+	}
+
+	cout << "MatrixProcess RestFreeQueue: The work queue size is " << workq->size << ", free queue size is " << freeq->size << endl;
 }
