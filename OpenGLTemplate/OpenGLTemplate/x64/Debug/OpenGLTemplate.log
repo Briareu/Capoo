@@ -1,0 +1,42 @@
+﻿  main.cpp
+  Utils.cpp
+  正在生成代码...
+main.obj : error LNK2019: 无法解析的外部符号 __imp_glewInit，该符号在函数 main 中被引用
+main.obj : error LNK2019: 无法解析的外部符号 glfwInit，该符号在函数 main 中被引用
+main.obj : error LNK2019: 无法解析的外部符号 glfwTerminate，该符号在函数 main 中被引用
+main.obj : error LNK2019: 无法解析的外部符号 glfwWindowHint，该符号在函数 main 中被引用
+main.obj : error LNK2019: 无法解析的外部符号 glfwCreateWindow，该符号在函数 main 中被引用
+main.obj : error LNK2019: 无法解析的外部符号 glfwDestroyWindow，该符号在函数 main 中被引用
+main.obj : error LNK2019: 无法解析的外部符号 glfwWindowShouldClose，该符号在函数 main 中被引用
+main.obj : error LNK2019: 无法解析的外部符号 glfwPollEvents，该符号在函数 main 中被引用
+main.obj : error LNK2019: 无法解析的外部符号 glfwGetTime，该符号在函数 main 中被引用
+main.obj : error LNK2019: 无法解析的外部符号 glfwMakeContextCurrent，该符号在函数 main 中被引用
+main.obj : error LNK2019: 无法解析的外部符号 glfwSwapBuffers，该符号在函数 main 中被引用
+main.obj : error LNK2019: 无法解析的外部符号 glfwSwapInterval，该符号在函数 main 中被引用
+main.obj : error LNK2001: 无法解析的外部符号 __imp___glewBindBuffer
+main.obj : error LNK2001: 无法解析的外部符号 __imp___glewBufferData
+main.obj : error LNK2001: 无法解析的外部符号 __imp___glewGenBuffers
+main.obj : error LNK2001: 无法解析的外部符号 __imp___glewEnableVertexAttribArray
+main.obj : error LNK2001: 无法解析的外部符号 __imp___glewGetAttribLocation
+main.obj : error LNK2001: 无法解析的外部符号 __imp___glewUseProgram
+main.obj : error LNK2001: 无法解析的外部符号 __imp___glewVertexAttribPointer
+main.obj : error LNK2001: 无法解析的外部符号 __imp___glewBindVertexArray
+main.obj : error LNK2001: 无法解析的外部符号 __imp___glewGenVertexArrays
+Utils.obj : error LNK2019: 无法解析的外部符号 __imp_glewIsSupported，该符号在函数 "public: static unsigned int __cdecl Utils::loadTexture(char const *)" (?loadTexture@Utils@@SAIPEBD@Z) 中被引用
+Utils.obj : error LNK2019: 无法解析的外部符号 SOIL_load_OGL_texture，该符号在函数 "public: static unsigned int __cdecl Utils::loadTexture(char const *)" (?loadTexture@Utils@@SAIPEBD@Z) 中被引用
+Utils.obj : error LNK2019: 无法解析的外部符号 SOIL_load_OGL_cubemap，该符号在函数 "public: static unsigned int __cdecl Utils::loadCubeMap(char const *)" (?loadCubeMap@Utils@@SAIPEBD@Z) 中被引用
+Utils.obj : error LNK2001: 无法解析的外部符号 __imp___glewAttachShader
+Utils.obj : error LNK2001: 无法解析的外部符号 __imp___glewCompileShader
+Utils.obj : error LNK2001: 无法解析的外部符号 __imp___glewCreateProgram
+Utils.obj : error LNK2001: 无法解析的外部符号 __imp___glewCreateShader
+Utils.obj : error LNK2001: 无法解析的外部符号 __imp___glewGetProgramInfoLog
+Utils.obj : error LNK2001: 无法解析的外部符号 __imp___glewGetProgramiv
+Utils.obj : error LNK2001: 无法解析的外部符号 __imp___glewGetShaderInfoLog
+Utils.obj : error LNK2001: 无法解析的外部符号 __imp___glewGetShaderiv
+Utils.obj : error LNK2001: 无法解析的外部符号 __imp___glewLinkProgram
+Utils.obj : error LNK2001: 无法解析的外部符号 __imp___glewShaderSource
+Utils.obj : error LNK2001: 无法解析的外部符号 __imp___glewGenerateMipmap
+D:\OpenGLtemplate\lib\glfw3dll.lib : warning LNK4272: 库计算机类型“x86”与目标计算机类型“x64”冲突
+D:\OpenGLtemplate\lib\glew32.lib : warning LNK4272: 库计算机类型“x86”与目标计算机类型“x64”冲突
+D:\OpenGLtemplate\lib\soil2.lib : warning LNK4272: 库计算机类型“x86”与目标计算机类型“x64”冲突
+D:\Myprogram\OpenGLTemplate\x64\Debug\OpenGLTemplate.exe : fatal error LNK1120: 35 个无法解析的外部命令

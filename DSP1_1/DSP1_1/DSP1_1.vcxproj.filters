@@ -21,13 +21,8 @@
     <ClInclude Include="buffer.h">
       <Filter>头文件</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="buffer.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="filemanage.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
+    <ClInclude Include="filemanage.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

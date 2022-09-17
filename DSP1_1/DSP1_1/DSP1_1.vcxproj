@@ -127,10 +127,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="buffer.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="buffer.cpp" />
-    <ClCompile Include="filemanage.cpp" />
+    <ClInclude Include="filemanage.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
