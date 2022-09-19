@@ -2,28 +2,52 @@
 #ifndef LOOPQUE
 #include<new>
 #define LOOPQUE
+#endif // !LOOPQUE
 
 using namespace std;
 
-template<typename _TYPE>
+struct input {
+	int matrixnum;
+	int data;
+	int row;
+	int col;
+	input(int num = -1, int d = -1, int r = -1, int c = -1) {
+		matrixnum = num;
+		data = d;
+		row = r;
+		col = c;
+	}
+	void setnum(int num) {
+		matrixnum = num;
+	}
+	void setd(int d) {
+		data = d;
+	}
+	void setr(int r) {
+		row = r;
+	}
+	void setc(int c) {
+		col = c;
+	}
+};
+
 class LoopQueue {
 private:
 	int size;
 	int cap;
-	int dehit;
 	int ptr;
-	int* que;
+	input* que;
 public:
 	LoopQueue(int mcap = 12) {
 		cap = mcap;
 		size = 0;
-		dehit = 0;
 		ptr = 0;
-		que = new int[cap];
+		que = new input[cap];
 	}
-	bool push(int data) {
+	void push(input data) {
 		if (size == cap) {
-			return false;
+			pop();
+			push(data);
 		}
 		else {
 			que[ptr] = data;
@@ -37,18 +61,28 @@ public:
 		}
 		else {
 			ptr--;
-			que[ptr] = 0;
+			que[0] = input();
+			for (int i = 0; i < size - 1; i++) {
+				que[i] = que[i + 1];
+			}
 			size--;
+			return true;
 		}
 	}
-	pair<int, bool> get(int of) {
+	pair<input, bool> get(int of) {
 		if (of > size) {
-			return pair<int,bool>(0, false);
+			return pair<input,bool>(input(), false);
 		}
 		else {
-
+			return pair<input, bool>(que[of], true);
 		}
 	}
+	pair<input, bool> find(int r, int c, int num) {
+		for (int i = 0; i < this->size; i++) {
+			if (que[i].col == c && que[i].row == r && que[i].matrixnum == num) {
+				return pair<input, bool>(que[i], true);
+			}
+		}
+		return pair<input, bool>(input(), false);
+	}
 };
-
-#endif // !LOOPQUE
