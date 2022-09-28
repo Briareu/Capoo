@@ -1,2 +1,10 @@
 ﻿  main.cpp
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(30): warning C4244: “return”: 从“double”转换到“float”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(38): warning C4244: “*=”: 从“double”转换到“T”，可能丢失数据
+          with
+          [
+              T=float
+          ]
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(68): warning C4101: “line_colors”: 未引用的局部变量
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(67): warning C4101: “line_vertices”: 未引用的局部变量
   OpenGLTemplate.vcxproj -> D:\Myprogram\OpenGLTemplate\Debug\OpenGLTemplate.exe
