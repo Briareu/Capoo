@@ -106,9 +106,12 @@ void init(GLFWwindow* window)
 		0);
 
 
-	float vertices[9] = {
+	float vertices[18] = {
 		-0.25f, 0.4f, 0.0f,
+		0.45f, 0.55f, 0.0f,
 		0.5f, 0.6f, 0.0f,
+		0.53f, 0.59f, 0.0f,
+		0.55f,0.55f,0.0f,
 		0.6f, 0.0f, 0.0f
 	};
 	glGenVertexArrays(1, &vao[2]);
@@ -121,9 +124,12 @@ void init(GLFWwindow* window)
 	glVertexAttribPointer(vPositionLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(location);
 
-	float vertices2[9] = {
+	float vertices2[18] = {
 		0.25f, 0.4f, 0.0f,
+		-0.45f, 0.55f, 0.0f,
 		-0.5f, 0.6f, 0.0f,
+		-0.53f, 0.59f, 0.0f,
+		-0.55f,0.55f,0.0f,
 		-0.6f, 0.0f, 0.0f
 	};
 	glGenVertexArrays(1, &vao[3]);
@@ -151,11 +157,11 @@ void display(GLFWwindow* window, double currentTime)
 
 
 	glBindVertexArray(vao[2]);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 6);
 
 
 	glBindVertexArray(vao[3]);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 6);
 }
 
 int main(void)
