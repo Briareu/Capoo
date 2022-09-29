@@ -4,4 +4,6 @@ d:\myprogram\opengltemplate\opengltemplate\main.cpp(39): warning C4244: “*=”
           [
               T=float
           ]
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(341): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(342): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
   OpenGLTemplate.vcxproj -> D:\Myprogram\OpenGLTemplate\Debug\OpenGLTemplate.exe

@@ -8,8 +8,8 @@
 #include <math.h>
 using namespace std;
 
-#define numVAOs 6 //脸，眼睛*2，耳朵*2
-#define numVBOs 12
+#define numVAOs 7 //脸，眼睛*2，耳朵*2
+#define numVBOs 14
 
 #define M_PI acos(-1)
 
@@ -74,20 +74,20 @@ void init(GLFWwindow* window)
 	glm::vec3 ellipse_colors[ELLIPSE_NUM_POINTS];
 	glm::vec3 decolors = glm::vec3(0.0, 0.6, 1.0);
 	glm::vec2 ellipsecenter(0, 0);
-	generateEllipsePoints(ellipse_vertices, ellipse_colors, decolors, 0, ELLIPSE_NUM_POINTS, ellipsecenter, 0.6, 0.9);
+	generateEllipsePoints(ellipse_vertices, ellipse_colors, decolors, 0, ELLIPSE_NUM_POINTS, ellipsecenter, 0.6, 0.8);
 
 	//生成椭圆（眼睛）
 	//右眼
 	glm::vec2 ellipse_vertices1[ELLIPSE_NUM_POINTS];
 	glm::vec3 ellipse_colors1[ELLIPSE_NUM_POINTS];
 	glm::vec3 decolors1 = glm::vec3(0.0, 0.0, 0.0);
-	glm::vec2 ellipsecenter1(0.3, 0.05);
+	glm::vec2 ellipsecenter1(0.35, 0.04);
 	generateEllipsePoints(ellipse_vertices1, ellipse_colors1, decolors1, 0, ELLIPSE_NUM_POINTS, ellipsecenter1, 0.12, 1.2);
 	//左眼
 	glm::vec2 ellipse_vertices2[ELLIPSE_NUM_POINTS];
 	glm::vec3 ellipse_colors2[ELLIPSE_NUM_POINTS];
 	glm::vec3 decolors2 = glm::vec3(0.0, 0.0, 0.0);
-	glm::vec2 ellipsecenter2(-0.3, 0.05);
+	glm::vec2 ellipsecenter2(-0.35, 0.04);
 	generateEllipsePoints(ellipse_vertices2, ellipse_colors2, decolors2, 0, ELLIPSE_NUM_POINTS, ellipsecenter2, 0.12, 1.2);
 
 	// 初始化椭圆（脸）
@@ -181,15 +181,21 @@ void init(GLFWwindow* window)
 	glEnableVertexAttribArray(vColorLoc);
 
 	//耳朵
-	float vertices[18] = {
-		-0.25f, 0.4f, 0.0f,
-		0.45f, 0.55f, 0.0f,
-		0.5f, 0.6f, 0.0f,
-		0.53f, 0.59f, 0.0f,
-		0.55f,0.55f,0.0f,
-		0.6f, 0.0f, 0.0f
+	float vertices[27] = {
+		0.0f, 0.4f, 0.0f,
+		0.17f,0.55f,0.0f,
+		0.3f, 0.65f, 0.0f,
+		0.32f, 0.66f, 0.0f,
+		0.35f, 0.65f, 0.0f,
+		0.39f,0.6f,0.0f,
+		0.49f,0.4f,0.0f,
+		0.54f,0.257f,0.0f,
+		0.592f, 0.047f, 0.0f
 	};
-	float vertexColors[24] = {
+	float vertexColors[36] = {
+	   0.0f,0.6f,1.0f,1.0f,
+	   0.0f,0.6f,1.0f,1.0f,
+	   0.0f,0.6f,1.0f,1.0f,
 	   0.0f,0.6f,1.0f,1.0f,
 	   0.0f,0.6f,1.0f,1.0f,
 	   0.0f,0.6f,1.0f,1.0f,
@@ -216,15 +222,21 @@ void init(GLFWwindow* window)
 	glEnableVertexAttribArray(vColorLoc);
 
 
-	float vertices2[18] = {
-		0.25f, 0.4f, 0.0f,
-		-0.45f, 0.55f, 0.0f,
-		-0.5f, 0.6f, 0.0f,
-		-0.53f, 0.59f, 0.0f,
-		-0.55f,0.55f,0.0f,
-		-0.6f, 0.0f, 0.0f
+	float vertices2[27] = {
+		0.0f, 0.4f, 0.0f,
+		-0.17f,0.55f,0.0f,
+		-0.3f, 0.65f, 0.0f,
+		-0.32f, 0.66f, 0.0f,
+		-0.35f, 0.65f, 0.0f,
+		-0.39f,0.6f,0.0f,
+		-0.49f,0.4f,0.0f,
+		-0.54f,0.257f,0.0f,
+		-0.592f, 0.047f, 0.0f
 	};
-	float vertexColors1[24] = {
+	float vertexColors1[36] = {
+	   0.0f,0.6f,1.0f,1.0f,
+	   0.0f,0.6f,1.0f,1.0f,
+	   0.0f,0.6f,1.0f,1.0f,
 	   0.0f,0.6f,1.0f,1.0f,
 	   0.0f,0.6f,1.0f,1.0f,
 	   0.0f,0.6f,1.0f,1.0f,
@@ -251,94 +263,39 @@ void init(GLFWwindow* window)
 	glEnableVertexAttribArray(vColorLoc);
 
 
-	float vertex_mouth[22 * 3] = {
-		/*-0.14f, -0.05f, 0.0f,
-		-0.14f, -0.07f, 0.0f,
-		-0.13f, -0.08f, 0.0f,
-		-0.12f, -0.1f, 0.0f,
-		-0.09f, -0.12f, 0.0f,
-		-0.07f, -0.12f, 0.0f,
-		-0.05f, -0.12f, 0.0f,
-		-0.02f, -0.1f, 0.0f,
-		-0.01f, -0.08f, 0.0f,
-		0.0f, -0.07f, 0.0f,
-		0.0f, -0.05f, 0.0f,
-		0.01f, -0.08f, 0.0f,
-		0.02f, -0.1f, 0.0f,
-		0.05f, -0.12f, 0.0f,
-		0.07f, -0.12f, 0.0f,
-		0.09f, -0.12f, 0.0f,
-		0.12f, -0.1f, 0.0f,
-		0.13f, -0.08f, 0.0f,
-		0.14f, -0.07f, 0.0f,
-		0.14f, -0.05f, 0.0f*/
-
-		/*-0.14f, -0.08f, 0.0f,
-		-0.14f, -0.10f, 0.0f,
-		-0.13f, -0.11f, 0.0f,
-		-0.12f, -0.13f, 0.0f,
-		-0.09f, -0.15f, 0.0f,
-		-0.07f, -0.15f, 0.0f,
-		-0.05f, -0.15f, 0.0f,
-		-0.02f, -0.13f, 0.0f,
-		-0.01f, -0.11f, 0.0f,
-		0.0f, -0.1f, 0.0f,
-		0.0f, -0.08f, 0.0f,
-		0.01f, -0.11f, 0.0f,
-		0.02f, -0.13f, 0.0f,
-		0.05f, -0.15f, 0.0f,
-		0.07f, -0.15f, 0.0f,
-		0.09f, -0.15f, 0.0f,
-		0.12f, -0.13f, 0.0f,
-		0.13f, -0.11f, 0.0f,
-		0.14f, -0.1f, 0.0f,
-		0.14f, -0.08f, 0.0f*/
-
-		/*-0.14f, -0.15f, 0.0f,
-		-0.14f, -0.17f, 0.0f,
-		-0.13f, -0.18f, 0.0f,
-		-0.12f, -0.2f, 0.0f,
-		-0.09f, -0.22f, 0.0f,
-		-0.07f, -0.22f, 0.0f,
-		-0.05f, -0.22f, 0.0f,
-		-0.02f, -0.2f, 0.0f,
-		-0.01f, -0.18f, 0.0f,
-		0.0f, -0.17f, 0.0f,
-		0.0f, -0.15f, 0.0f,
-		0.01f, -0.18f, 0.0f,
-		0.02f, -0.2f, 0.0f,
-		0.05f, -0.22f, 0.0f,
-		0.07f, -0.22f, 0.0f,
-		0.09f, -0.22f, 0.0f,
-		0.12f, -0.2f, 0.0f,
-		0.13f, -0.18f, 0.0f,
-		0.14f, -0.17f, 0.0f,
-		0.14f, -0.15f, 0.0f*/
-
-		-0.14f, -0.18f, 0.0f,
-		-0.14f, -0.20f, 0.0f,
-		-0.13f, -0.21f, 0.0f,
-		-0.125f, -0.21f, 0.0f,
-		-0.12f, -0.23f, 0.0f,
-		-0.09f, -0.25f, 0.0f,
-		-0.07f, -0.25f, 0.0f,
-		-0.05f, -0.25f, 0.0f,
-		-0.02f, -0.23f, 0.0f,
-		-0.01f, -0.21f, 0.0f,
-		0.0f, -0.2f, 0.0f,
-		0.0f, -0.18f, 0.0f,
-		0.01f, -0.21f, 0.0f,
-		0.02f, -0.23f, 0.0f,
-		0.05f, -0.25f, 0.0f,
-		0.07f, -0.25f, 0.0f,
-		0.09f, -0.25f, 0.0f,
-		0.12f, -0.23f, 0.0f,
-		0.125f, -0.21f, 0.0f,
-		0.13f, -0.21f, 0.0f,
-		0.14f, -0.2f, 0.0f,
-		0.14f, -0.18f, 0.0f
+	float vertex_mouth[26 * 3] = {
+		-0.14f, -0.02f, 0.0f,
+		-0.14f, -0.02f, 0.0f,
+		-0.13f, -0.02f, 0.0f,
+		-0.125f, -0.02f, 0.0f,
+		-0.12f, -0.05f, 0.0f,
+		-0.11f, -0.055f, 0.0f,
+		-0.10f, -0.065f, 0.0f,
+		-0.09f, -0.07f, 0.0f,
+		-0.07f, -0.07f, 0.0f,
+		-0.05f, -0.07f, 0.0f,
+		-0.02f, -0.05f, 0.0f,
+		-0.01f, -0.03f, 0.0f,
+		0.0f, -0.02f, 0.0f,
+		0.0f, -0.02f, 0.0f,
+		0.01f, -0.03f, 0.0f,
+		0.02f, -0.05f, 0.0f,
+		0.05f, -0.07f, 0.0f,
+		0.07f, -0.07f, 0.0f,
+		0.09f, -0.07f, 0.0f,
+		0.10f, -0.065f, 0.0f,
+		0.11f, -0.055f, 0.0f,
+		0.12f, -0.05f, 0.0f,
+		0.125f, -0.03f, 0.0f,
+		0.13f, -0.03f, 0.0f,
+		0.14f, -0.02f, 0.0f,
+		0.14f, -0.02f, 0.0f
 	};
-	float mouth_color[22 * 4] = {
+	float mouth_color[26 * 4] = {
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 0.0f,
@@ -378,6 +335,33 @@ void init(GLFWwindow* window)
 	glVertexAttribPointer(vColorLoc, 4, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(vColorLoc);
 
+	float vertex_circle[100 * 3];
+	float vertex_cir_color[100 * 4];
+	for (int i = 0; i < 100; i++) {
+		vertex_circle[i * 3] = 0.6 * cos(M_PI * 2 * i / 100);
+		vertex_circle[i * 3 + 1] = 0.48 * sin(M_PI * 2 * i / 100);
+		vertex_circle[i * 3 + 2] = 0;
+
+		vertex_cir_color[i * 4] = 0.0f;
+		vertex_cir_color[i * 4 + 1] = 0.0f;
+		vertex_cir_color[i * 4 + 2] = 0.0f;
+		vertex_cir_color[i * 4 + 3] = 0.0f;
+	}
+	glBindVertexArray(vao[6]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[12]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_circle), vertex_circle, GL_STATIC_DRAW);
+	//将VBO关联给顶点着色器中相应的顶点属性
+	vPositionLoc = glGetAttribLocation(renderingProgram, "vPosition");
+	glVertexAttribPointer(vPositionLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(vPositionLoc);
+
+	// Load the data into the GPU  
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[13]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_cir_color), vertex_cir_color, GL_STATIC_DRAW);
+	//将VBO关联给顶点着色器中相应的顶点属性
+	vColorLoc = glGetAttribLocation(renderingProgram, "vColor");
+	glVertexAttribPointer(vColorLoc, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(vColorLoc);
 }
 //函数绘制
 void display(GLFWwindow* window, double currentTime)
@@ -393,10 +377,10 @@ void display(GLFWwindow* window, double currentTime)
 	glDrawArrays(GL_TRIANGLE_FAN, 0, ELLIPSE_NUM_POINTS);
 
 	glBindVertexArray(vao[3]);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 6);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 9);
 
 	glBindVertexArray(vao[4]);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 6);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 9);
 	glBindVertexArray(vao[1]);
 	glDrawArrays(GL_TRIANGLE_FAN, 0, ELLIPSE_NUM_POINTS);
 	glBindVertexArray(vao[2]);
@@ -404,7 +388,11 @@ void display(GLFWwindow* window, double currentTime)
 
 	glBindVertexArray(vao[5]);
 	glLineWidth(9);
-	glDrawArrays(GL_LINE_STRIP, 0, 22);
+	glDrawArrays(GL_LINE_STRIP, 0, 26);
+
+	glBindVertexArray(vao[6]);
+	glLineWidth(10);
+	glDrawArrays(GL_LINE_LOOP, 0, 100);
 }
 
 int main(void)
