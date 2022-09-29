@@ -406,7 +406,7 @@ int main(void)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	//创建窗口
-	GLFWwindow* window = glfwCreateWindow(800, 800, "A triangle", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(800, 800, "Capoo", NULL, NULL);
 	glfwMakeContextCurrent(window);
 
 	if (glewInit() != GLEW_OK)//glew初始化
