@@ -1,9 +1,12 @@
 #version 430
 
-in vec2 vPosition;
+in vec3 vPosition;
+in vec4 vColor;
+out vec4 fColor;
 
 void main()
 {
-    gl_Position = vec4(vPosition, 0.0, 1.0);
+	fColor = vColor;
+    gl_Position = vec4(vPosition, 1.0);
 }
 

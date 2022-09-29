@@ -8,8 +8,8 @@
 #include <math.h>
 using namespace std;
 
-#define numVAOs 4
-#define numVBOs 5
+#define numVAOs 6 //脸，眼睛*2，耳朵*2
+#define numVBOs 12
 
 #define M_PI acos(-1)
 
@@ -23,12 +23,13 @@ const int LINE_NUM_POINTS = 2;
 
 GLuint vColorLoc, vPositionLoc;
 
-
+/*
 // 根据角度生成颜色
 float generateAngleColor(double angle)
 {
 	return 1.0 / (2 * M_PI) * angle;
-}
+}*/
+
 
 // 计算椭圆/圆上的点
 glm::vec2 getEllipseVertex(glm::vec2 center, double scale, double verticalScale, double angle)
@@ -41,7 +42,7 @@ glm::vec2 getEllipseVertex(glm::vec2 center, double scale, double verticalScale,
 }
 
 // 获得椭圆/圆的每个顶点
-void generateEllipsePoints(glm::vec2 vertices[], glm::vec3 colors[], int startVertexIndex, int numPoints,
+void generateEllipsePoints(glm::vec2 vertices[], glm::vec3 colors[], glm::vec3 decolor, int startVertexIndex, int numPoints,
 	glm::vec2 center, double scale, double verticalScale)
 {
 	double angleIncrement = (2 * M_PI) / numPoints;
@@ -50,10 +51,10 @@ void generateEllipsePoints(glm::vec2 vertices[], glm::vec3 colors[], int startVe
 	for (int i = startVertexIndex; i < startVertexIndex + numPoints; ++i) {
 		vertices[i] = getEllipseVertex(center, scale, verticalScale, currentAngle);
 		if (verticalScale == 1.0) { //圆形
-			colors[i] = glm::vec3(generateAngleColor(currentAngle), 0.0, 0.0);
+			colors[i] = decolor;
 		}
 		else { //椭圆
-			colors[i] = glm::vec3(generateAngleColor(currentAngle), 0.0, 0.0);//RED;
+			colors[i] = decolor;
 		}
 		currentAngle += angleIncrement;
 	}
@@ -62,30 +63,44 @@ void generateEllipsePoints(glm::vec2 vertices[], glm::vec3 colors[], int startVe
 //导入着色器，初始化窗口
 void init(GLFWwindow* window)
 {
-
-	// 定义线的点
-	glm::vec2 line_vertices[LINE_NUM_POINTS];
-	glm::vec3 line_colors[LINE_NUM_POINTS];
-
-	//生成椭圆
-	glm::vec2 ellipse_vertices[ELLIPSE_NUM_POINTS];
-	glm::vec3 ellipse_colors[ELLIPSE_NUM_POINTS];
-	glm::vec2 ellipsecenter(0, 0);
-	generateEllipsePoints(ellipse_vertices, ellipse_colors, 0, ELLIPSE_NUM_POINTS, ellipsecenter, 0.6, 0.9);
-
 	renderingProgram = Utils::createShaderProgram("vertShader.glsl", "fragShader.glsl");
 
-	// 初始化椭圆
-	glGenVertexArrays(1, &vao[1]);
-	glBindVertexArray(vao[1]);
+	glGenVertexArrays(numVAOs, vao);
+	glGenBuffers(numVBOs, vbo);
+
+
+	//生成椭圆（脸）
+	glm::vec2 ellipse_vertices[ELLIPSE_NUM_POINTS];
+	glm::vec3 ellipse_colors[ELLIPSE_NUM_POINTS];
+	glm::vec3 decolors = glm::vec3(0.0, 0.6, 1.0);
+	glm::vec2 ellipsecenter(0, 0);
+	generateEllipsePoints(ellipse_vertices, ellipse_colors, decolors, 0, ELLIPSE_NUM_POINTS, ellipsecenter, 0.6, 0.9);
+
+	//生成椭圆（眼睛）
+	//右眼
+	glm::vec2 ellipse_vertices1[ELLIPSE_NUM_POINTS];
+	glm::vec3 ellipse_colors1[ELLIPSE_NUM_POINTS];
+	glm::vec3 decolors1 = glm::vec3(0.0, 0.0, 0.0);
+	glm::vec2 ellipsecenter1(0.3, 0.05);
+	generateEllipsePoints(ellipse_vertices1, ellipse_colors1, decolors1, 0, ELLIPSE_NUM_POINTS, ellipsecenter1, 0.12, 1.2);
+	//左眼
+	glm::vec2 ellipse_vertices2[ELLIPSE_NUM_POINTS];
+	glm::vec3 ellipse_colors2[ELLIPSE_NUM_POINTS];
+	glm::vec3 decolors2 = glm::vec3(0.0, 0.0, 0.0);
+	glm::vec2 ellipsecenter2(-0.3, 0.05);
+	generateEllipsePoints(ellipse_vertices2, ellipse_colors2, decolors2, 0, ELLIPSE_NUM_POINTS, ellipsecenter2, 0.12, 1.2);
+
+	// 初始化椭圆（脸）
+	glGenVertexArrays(1, &vao[0]);
+	glBindVertexArray(vao[0]);
 
 	glGenBuffers(1, &vbo[0]);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(ellipse_vertices), ellipse_vertices, GL_STATIC_DRAW);
-	GLuint location = glGetAttribLocation(renderingProgram, "vPosition");
-	glEnableVertexAttribArray(location);
+	vPositionLoc = glGetAttribLocation(renderingProgram, "vPosition");
+	glEnableVertexAttribArray(vPositionLoc);
 	glVertexAttribPointer(
-		location,
+		vPositionLoc,
 		2,
 		GL_FLOAT,
 		GL_FALSE,
@@ -95,17 +110,77 @@ void init(GLFWwindow* window)
 	glGenBuffers(1, &vbo[1]);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(ellipse_colors), ellipse_colors, GL_STATIC_DRAW);
-	GLuint cLocation = glGetAttribLocation(renderingProgram, "vColor");
-	glEnableVertexAttribArray(cLocation);
+	vColorLoc = glGetAttribLocation(renderingProgram, "vColor");
+	glEnableVertexAttribArray(vColorLoc);
 	glVertexAttribPointer(
-		cLocation,
+		vColorLoc,
 		3,
 		GL_FLOAT,
 		GL_FALSE,
 		sizeof(glm::vec3),
 		0);
+	glEnableVertexAttribArray(vColorLoc);
 
+	// 初始化椭圆（眼睛）
+	//右眼
+	vPositionLoc = glGetAttribLocation(renderingProgram, "vPosition");
+	vColorLoc = glGetAttribLocation(renderingProgram, "vColor");
+	glBindVertexArray(vao[1]);
 
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(ellipse_vertices1), ellipse_vertices1, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(vPositionLoc);
+	glVertexAttribPointer(
+		vPositionLoc,
+		2,
+		GL_FLOAT,
+		GL_FALSE,
+		sizeof(glm::vec2),
+		0);
+
+	glGenBuffers(1, &vbo[3]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(ellipse_colors1), ellipse_colors1, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(vColorLoc);
+	glVertexAttribPointer(
+		vColorLoc,
+		3,
+		GL_FLOAT,
+		GL_FALSE,
+		sizeof(glm::vec3),
+		0);
+	glEnableVertexAttribArray(vColorLoc);
+
+	//左眼
+	vPositionLoc = glGetAttribLocation(renderingProgram, "vPosition");
+	vColorLoc = glGetAttribLocation(renderingProgram, "vColor");
+	glBindVertexArray(vao[2]);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(ellipse_vertices2), ellipse_vertices2, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(vPositionLoc);
+	glVertexAttribPointer(
+		vPositionLoc,
+		2,
+		GL_FLOAT,
+		GL_FALSE,
+		sizeof(glm::vec2),
+		0);
+
+	glGenBuffers(1, &vbo[3]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[5]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(ellipse_colors2), ellipse_colors2, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(vColorLoc);
+	glVertexAttribPointer(
+		vColorLoc,
+		3,
+		GL_FLOAT,
+		GL_FALSE,
+		sizeof(glm::vec3),
+		0);
+	glEnableVertexAttribArray(vColorLoc);
+
+	//耳朵
 	float vertices[18] = {
 		-0.25f, 0.4f, 0.0f,
 		0.45f, 0.55f, 0.0f,
@@ -114,15 +189,32 @@ void init(GLFWwindow* window)
 		0.55f,0.55f,0.0f,
 		0.6f, 0.0f, 0.0f
 	};
-	glGenVertexArrays(1, &vao[2]);
-	glGenBuffers(1, &vbo[3]);
-
-	glBindVertexArray(vao[2]);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
+	float vertexColors[24] = {
+	   0.0f,0.6f,1.0f,1.0f,
+	   0.0f,0.6f,1.0f,1.0f,
+	   0.0f,0.6f,1.0f,1.0f,
+	   0.0f,0.6f,1.0f,1.0f,
+	   0.0f,0.6f,1.0f,1.0f,
+	   0.0f,0.6f,1.0f,1.0f
+	};
+	//绑定当前VAO
+	glBindVertexArray(vao[3]);
+	// Load the data into the GPU  
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	//将VBO关联给顶点着色器中相应的顶点属性
+	vPositionLoc = glGetAttribLocation(renderingProgram, "vPosition");
 	glVertexAttribPointer(vPositionLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(location);
+	glEnableVertexAttribArray(vPositionLoc);
+
+	// Load the data into the GPU  
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[7]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexColors), vertexColors, GL_STATIC_DRAW);
+	//将VBO关联给顶点着色器中相应的顶点属性
+	vColorLoc = glGetAttribLocation(renderingProgram, "vColor");
+	glVertexAttribPointer(vColorLoc, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(vColorLoc);
+
 
 	float vertices2[18] = {
 		0.25f, 0.4f, 0.0f,
@@ -132,36 +224,187 @@ void init(GLFWwindow* window)
 		-0.55f,0.55f,0.0f,
 		-0.6f, 0.0f, 0.0f
 	};
-	glGenVertexArrays(1, &vao[3]);
-	glGenBuffers(1, &vbo[4]);
-
-	glBindVertexArray(vao[3]);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
+	float vertexColors1[24] = {
+	   0.0f,0.6f,1.0f,1.0f,
+	   0.0f,0.6f,1.0f,1.0f,
+	   0.0f,0.6f,1.0f,1.0f,
+	   0.0f,0.6f,1.0f,1.0f,
+	   0.0f,0.6f,1.0f,1.0f,
+	   0.0f,0.6f,1.0f,1.0f
+	};
+	//绑定当前VAO
+	glBindVertexArray(vao[4]);
+	// Load the data into the GPU  
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[8]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);
+	//将VBO关联给顶点着色器中相应的顶点属性
+	vPositionLoc = glGetAttribLocation(renderingProgram, "vPosition");
 	glVertexAttribPointer(vPositionLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(location);
+	glEnableVertexAttribArray(vPositionLoc);
+
+	// Load the data into the GPU  
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexColors1), vertexColors1, GL_STATIC_DRAW);
+	//将VBO关联给顶点着色器中相应的顶点属性
+	vColorLoc = glGetAttribLocation(renderingProgram, "vColor");
+	glVertexAttribPointer(vColorLoc, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(vColorLoc);
+
+
+	float vertex_mouth[22 * 3] = {
+		/*-0.14f, -0.05f, 0.0f,
+		-0.14f, -0.07f, 0.0f,
+		-0.13f, -0.08f, 0.0f,
+		-0.12f, -0.1f, 0.0f,
+		-0.09f, -0.12f, 0.0f,
+		-0.07f, -0.12f, 0.0f,
+		-0.05f, -0.12f, 0.0f,
+		-0.02f, -0.1f, 0.0f,
+		-0.01f, -0.08f, 0.0f,
+		0.0f, -0.07f, 0.0f,
+		0.0f, -0.05f, 0.0f,
+		0.01f, -0.08f, 0.0f,
+		0.02f, -0.1f, 0.0f,
+		0.05f, -0.12f, 0.0f,
+		0.07f, -0.12f, 0.0f,
+		0.09f, -0.12f, 0.0f,
+		0.12f, -0.1f, 0.0f,
+		0.13f, -0.08f, 0.0f,
+		0.14f, -0.07f, 0.0f,
+		0.14f, -0.05f, 0.0f*/
+
+		/*-0.14f, -0.08f, 0.0f,
+		-0.14f, -0.10f, 0.0f,
+		-0.13f, -0.11f, 0.0f,
+		-0.12f, -0.13f, 0.0f,
+		-0.09f, -0.15f, 0.0f,
+		-0.07f, -0.15f, 0.0f,
+		-0.05f, -0.15f, 0.0f,
+		-0.02f, -0.13f, 0.0f,
+		-0.01f, -0.11f, 0.0f,
+		0.0f, -0.1f, 0.0f,
+		0.0f, -0.08f, 0.0f,
+		0.01f, -0.11f, 0.0f,
+		0.02f, -0.13f, 0.0f,
+		0.05f, -0.15f, 0.0f,
+		0.07f, -0.15f, 0.0f,
+		0.09f, -0.15f, 0.0f,
+		0.12f, -0.13f, 0.0f,
+		0.13f, -0.11f, 0.0f,
+		0.14f, -0.1f, 0.0f,
+		0.14f, -0.08f, 0.0f*/
+
+		/*-0.14f, -0.15f, 0.0f,
+		-0.14f, -0.17f, 0.0f,
+		-0.13f, -0.18f, 0.0f,
+		-0.12f, -0.2f, 0.0f,
+		-0.09f, -0.22f, 0.0f,
+		-0.07f, -0.22f, 0.0f,
+		-0.05f, -0.22f, 0.0f,
+		-0.02f, -0.2f, 0.0f,
+		-0.01f, -0.18f, 0.0f,
+		0.0f, -0.17f, 0.0f,
+		0.0f, -0.15f, 0.0f,
+		0.01f, -0.18f, 0.0f,
+		0.02f, -0.2f, 0.0f,
+		0.05f, -0.22f, 0.0f,
+		0.07f, -0.22f, 0.0f,
+		0.09f, -0.22f, 0.0f,
+		0.12f, -0.2f, 0.0f,
+		0.13f, -0.18f, 0.0f,
+		0.14f, -0.17f, 0.0f,
+		0.14f, -0.15f, 0.0f*/
+
+		-0.14f, -0.18f, 0.0f,
+		-0.14f, -0.20f, 0.0f,
+		-0.13f, -0.21f, 0.0f,
+		-0.125f, -0.21f, 0.0f,
+		-0.12f, -0.23f, 0.0f,
+		-0.09f, -0.25f, 0.0f,
+		-0.07f, -0.25f, 0.0f,
+		-0.05f, -0.25f, 0.0f,
+		-0.02f, -0.23f, 0.0f,
+		-0.01f, -0.21f, 0.0f,
+		0.0f, -0.2f, 0.0f,
+		0.0f, -0.18f, 0.0f,
+		0.01f, -0.21f, 0.0f,
+		0.02f, -0.23f, 0.0f,
+		0.05f, -0.25f, 0.0f,
+		0.07f, -0.25f, 0.0f,
+		0.09f, -0.25f, 0.0f,
+		0.12f, -0.23f, 0.0f,
+		0.125f, -0.21f, 0.0f,
+		0.13f, -0.21f, 0.0f,
+		0.14f, -0.2f, 0.0f,
+		0.14f, -0.18f, 0.0f
+	};
+	float mouth_color[22 * 4] = {
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f
+	};
+	glBindVertexArray(vao[5]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[10]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_mouth), vertex_mouth, GL_STATIC_DRAW);
+	//将VBO关联给顶点着色器中相应的顶点属性
+	vPositionLoc = glGetAttribLocation(renderingProgram, "vPosition");
+	glVertexAttribPointer(vPositionLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(vPositionLoc);
+
+	// Load the data into the GPU  
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[11]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(mouth_color), mouth_color, GL_STATIC_DRAW);
+	//将VBO关联给顶点着色器中相应的顶点属性
+	vColorLoc = glGetAttribLocation(renderingProgram, "vColor");
+	glVertexAttribPointer(vColorLoc, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(vColorLoc);
+
 }
 //函数绘制
 void display(GLFWwindow* window, double currentTime)
 {
 	glUseProgram(renderingProgram);
 
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 
 	//绘制椭圆
-	glBindVertexArray(vao[1]);
+	glBindVertexArray(vao[0]);
 	glDrawArrays(GL_TRIANGLE_FAN, 0, ELLIPSE_NUM_POINTS);
-
-
-	glBindVertexArray(vao[2]);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 6);
-
 
 	glBindVertexArray(vao[3]);
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 6);
+
+	glBindVertexArray(vao[4]);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 6);
+	glBindVertexArray(vao[1]);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, ELLIPSE_NUM_POINTS);
+	glBindVertexArray(vao[2]);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, ELLIPSE_NUM_POINTS);
+
+	glBindVertexArray(vao[5]);
+	glLineWidth(9);
+	glDrawArrays(GL_LINE_STRIP, 0, 22);
 }
 
 int main(void)
