@@ -4,13 +4,13 @@ d:\myprogram\opengltemplate\opengltemplate\main.cpp(39): warning C4244: “*=”
           [
               T=float
           ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(65): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(66): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(73): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(74): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(75): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(359): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(360): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(390): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(391): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(342): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(343): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(373): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(374): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+LINK : warning LNK4098: 默认库“MSVCRT”与其他库的使用冲突；请使用 /NODEFAULTLIB:library
+soil2.lib(SOIL2.obj) : warning LNK4099: 未找到 PDB“soil2-static-lib.pdb”(使用“soil2.lib(SOIL2.obj)”或在“D:\Myprogram\OpenGLTemplate\Debug\soil2-static-lib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+soil2.lib(image_DXT.obj) : warning LNK4099: 未找到 PDB“soil2-static-lib.pdb”(使用“soil2.lib(image_DXT.obj)”或在“D:\Myprogram\OpenGLTemplate\Debug\soil2-static-lib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+soil2.lib(image_helper.obj) : warning LNK4099: 未找到 PDB“soil2-static-lib.pdb”(使用“soil2.lib(image_helper.obj)”或在“D:\Myprogram\OpenGLTemplate\Debug\soil2-static-lib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+soil2.lib(wfETC.obj) : warning LNK4099: 未找到 PDB“soil2-static-lib.pdb”(使用“soil2.lib(wfETC.obj)”或在“D:\Myprogram\OpenGLTemplate\Debug\soil2-static-lib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
   OpenGLTemplate.vcxproj -> D:\Myprogram\OpenGLTemplate\Debug\OpenGLTemplate.exe

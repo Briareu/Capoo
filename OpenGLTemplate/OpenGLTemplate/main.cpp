@@ -60,23 +60,6 @@ void generateEllipsePoints(glm::vec2 vertices[], glm::vec3 colors[], glm::vec3 d
 	}
 }
 
-void circle(float data[], int o_x, int o_y, int R, int N) {
-	for (int i = 0; i < N; i++) {
-		data[i * 3] = R * cos(2 * M_PI * i / N) + o_x;
-		data[i * 3 + 1] = R * sin(2 * M_PI * i / N) + o_y;
-		data[i * 3 + 2] = 0;
-	}
-}
-
-void circlecolor(float data[], int r, int g, int b, int N) {
-	for (int i = 0; i < N; i++) {
-		data[i * 4] = r;
-		data[i * 4 + 1] = g;
-		data[i * 4 + 2] = b;
-		data[i * 4 + 3] = 0.0f;
-	}
-}
-
 //导入着色器，初始化窗口
 void init(GLFWwindow* window)
 {
