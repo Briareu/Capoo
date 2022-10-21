@@ -1,12 +1,16 @@
 #version 430
 
-in vec3 vPosition;
+layout (location=0) in vec3 position;
+
 in vec4 vColor;
-out vec4 fColor;
 
-void main()
-{
-	fColor = vColor;
-    gl_Position = vec4(vPosition, 1.0);
-}
+uniform mat4 mv_matrix;
+uniform mat4 proj_matrix;
 
+out vec4 varyingColor;
+
+void main(void)
+{	
+	gl_Position = proj_matrix * mv_matrix * vec4(position,1.0);
+	varyingColor = vColor;
+} 
