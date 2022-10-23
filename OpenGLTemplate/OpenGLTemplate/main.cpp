@@ -22,7 +22,7 @@ GLuint vao[numVAOs];
 GLuint vbo[numVBOs];
 
 // variable allocation for display
-GLuint mvLoc, projLoc, vColorLoc;
+GLuint mvLoc, projLoc, vColorLoc, viewLoc;
 int width, height;
 float aspect;
 glm::mat4 pMat, vMat, mMat, mvMat;
@@ -392,16 +392,19 @@ void display(GLFWwindow* window, double currentTime) {
 
 	mvLoc = glGetUniformLocation(renderingProgram, "mv_matrix");
 	projLoc = glGetUniformLocation(renderingProgram, "proj_matrix");
+	viewLoc = glGetUniformLocation(renderingProgram, "view_matrix");
 
 	GLuint rLoc = glGetUniformLocation(renderingProgram, "rcolor");
 	GLuint gLoc = glGetUniformLocation(renderingProgram, "gcolor");
 	GLuint bLoc = glGetUniformLocation(renderingProgram, "bcolor");
 
+	mvMat = glm::lookAt(glm::vec3(0.4, 0.5, 1.3), glm::vec3(0.1, 0.7, 0), glm::vec3(-0.2, 2.0, 0));
 
 	vMat = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
 	mvStack.push(vMat);
 
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
+	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(mvMat));
 
 	//mvStack.pop();
 
