@@ -1,84 +1,16 @@
 ﻿  main.cpp
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(46): warning C4244: “=”: 从“double”转换到“T”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(106): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(107): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(108): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(144): warning C4244: “=”: 从“double”转换到“T”，可能丢失数据
           with
           [
               T=float
           ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(47): warning C4244: “=”: 从“double”转换到“T”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(145): warning C4244: “=”: 从“double”转换到“T”，可能丢失数据
           with
           [
               T=float
-          ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(55): warning C4244: “=”: 从“double”转换到“T”，可能丢失数据
-          with
-          [
-              T=float
-          ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(56): warning C4244: “=”: 从“double”转换到“T”，可能丢失数据
-          with
-          [
-              T=float
-          ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(87): warning C4244: “=”: 从“double”转换到“T”，可能丢失数据
-          with
-          [
-              T=float
-          ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(88): warning C4244: “=”: 从“double”转换到“T”，可能丢失数据
-          with
-          [
-              T=float
-          ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(96): warning C4244: “=”: 从“double”转换到“T”，可能丢失数据
-          with
-          [
-              T=float
-          ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(97): warning C4244: “=”: 从“double”转换到“T”，可能丢失数据
-          with
-          [
-              T=float
-          ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(124): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(136): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
-          with
-          [
-              _Ty=float
-          ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(137): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
-          with
-          [
-              _Ty=float
-          ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(141): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
-          with
-          [
-              _Ty=float
-          ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(142): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
-          with
-          [
-              _Ty=float
-          ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(147): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
-          with
-          [
-              _Ty=float
-          ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(148): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
-          with
-          [
-              _Ty=float
-          ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(150): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
-          with
-          [
-              _Ty=float
-          ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(151): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
-          with
-          [
-              _Ty=float
           ]
 d:\myprogram\opengltemplate\opengltemplate\main.cpp(153): warning C4244: “=”: 从“double”转换到“T”，可能丢失数据
           with
@@ -90,54 +22,110 @@ d:\myprogram\opengltemplate\opengltemplate\main.cpp(154): warning C4244: “=”
           [
               T=float
           ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(159): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(224): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
           with
           [
               _Ty=float
           ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(160): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(225): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
           with
           [
               _Ty=float
           ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(164): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(229): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
           with
           [
               _Ty=float
           ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(165): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(230): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
           with
           [
               _Ty=float
           ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(169): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(235): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
           with
           [
               _Ty=float
           ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(170): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(236): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
           with
           [
               _Ty=float
           ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(179): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(238): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
           with
           [
               _Ty=float
           ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(180): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(239): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
           with
           [
               _Ty=float
           ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(184): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(241): warning C4244: “=”: 从“double”转换到“T”，可能丢失数据
+          with
+          [
+              T=float
+          ]
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(242): warning C4244: “=”: 从“double”转换到“T”，可能丢失数据
+          with
+          [
+              T=float
+          ]
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(247): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
           with
           [
               _Ty=float
           ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(185): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(248): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
           with
           [
               _Ty=float
+          ]
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(252): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
+          with
+          [
+              _Ty=float
+          ]
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(253): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
+          with
+          [
+              _Ty=float
+          ]
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(257): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
+          with
+          [
+              _Ty=float
+          ]
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(258): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
+          with
+          [
+              _Ty=float
+          ]
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(267): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
+          with
+          [
+              _Ty=float
+          ]
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(268): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
+          with
+          [
+              _Ty=float
+          ]
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(272): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
+          with
+          [
+              _Ty=float
+          ]
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(273): warning C4244: “参数”: 从“double”转换到“_Ty”，可能丢失数据
+          with
+          [
+              _Ty=float
+          ]
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(312): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(336): warning C4305: “=”: 从“double”到“T”截断
+          with
+          [
+              T=float
           ]
   OpenGLTemplate.vcxproj -> D:\Myprogram\OpenGLTemplate\Debug\OpenGLTemplate.exe
