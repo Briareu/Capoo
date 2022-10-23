@@ -28,39 +28,84 @@ float aspect;
 glm::mat4 pMat, vMat, mMat, mvMat;
 
 int num_cir1 = 0, num_cir2 = 0, num_cy = 0, num_cir;
+int num_tail = 0;
 
 
 stack<glm::mat4> mvStack;
 
-vector<float> circle(glm::vec3 center, float R, bool ishalf){
-	std::vector<float> circle;
-	int N = 64;
-	for (int y = 0; y < N; y++) {
-		for (int x = 0; x < N; x++) {
-			glm::vec3 temp_pos;
-			temp_pos.x = R * cos((float)x / (float)N * 2 * M_PI)*sin((float)y / (float)N * M_PI) + center.x;
-			temp_pos.y = R * cos((float)y / (float)N * M_PI) + center.y;
-			temp_pos.z = R * sin((float)x / (float)N * 2 * M_PI)*sin((float)y / (float)N * M_PI) + center.z;
-
-			circle.push_back(temp_pos.x);
-			circle.push_back(temp_pos.y);
-			circle.push_back(temp_pos.z);
-
-			num_cir++;
-		}
-	}
-	return circle;
+void drawEar(std::vector<float> &nodes, int &num_inner) {
+	nodes.push_back();
 }
 
-vector<float> setcolor(glm::vec3 color, int N) {
-	vector<float> res;
-	for (int i = 0; i < N; i++) {
-		res.push_back(color.x);
-		res.push_back(color.y);
-		res.push_back(color.z);
-		res.push_back(1.0f);
+void drawCone(glm::vec3 center, float R, float dp, std::vector<float> &nodes, int &num_inner) {
+	//R for the redium of the circle of the cone, 
+	//dp is the tall of this cone
+	for (int i = 0; i < 100; i++) {
+		nodes.push_back(center.x);
+		nodes.push_back(center.y);
+		nodes.push_back(center.z + dp);
+		num_inner++;
+
+		glm::vec3 temp;
+		temp.x = R * cos(M_PI * 2 * i / 100);
+		temp.y = R * sin(M_PI * 2 * i / 100);
+		temp.z = center.z;
+		nodes.push_back(temp.x);
+		nodes.push_back(temp.y);
+		nodes.push_back(temp.z);
+		num_inner++;
+
+		i++;
+		temp.x = R * cos(M_PI * 2 * i / 100);
+		temp.y = R * sin(M_PI * 2 * i / 100);
+		temp.z = center.z;
+		nodes.push_back(temp.x);
+		nodes.push_back(temp.y);
+		nodes.push_back(temp.z);
+		num_inner++;
+		i--;
 	}
-	return res;
+}
+
+void setcolor(vector<float> &color, glm::vec3 col, int num_inner) {
+	for (int i = 0; i < num_inner; i++) {
+		color.push_back(col.x);
+		color.push_back(col.y);
+		color.push_back(col.z);
+		color.push_back(1.0f);
+	}
+}
+
+void drawTail(glm::vec3 center, float R, glm::vec3 top, std::vector<float> &nodes, int &num_inner) {
+	//center底部圆心
+	//top顶点
+	//R底部半径
+	//num_inner--传全局变量的num_tail
+	for (int i = 0; i < 100; i++) {
+		nodes.push_back(top.x);
+		nodes.push_back(top.y);
+		nodes.push_back(top.z);
+		num_inner++;
+
+		glm::vec3 temp;
+		temp.x = R * cos(M_PI * 2 * i / 100) + center.x;
+		temp.y = R * sin(M_PI * 2 * i / 100) + center.y;
+		temp.z = center.z;
+		nodes.push_back(temp.x);
+		nodes.push_back(temp.y);
+		nodes.push_back(temp.z);
+		num_inner++;
+
+		i++;
+		temp.x = R * cos(M_PI * 2 * i / 100) + center.x;
+		temp.y = R * sin(M_PI * 2 * i / 100) + center.y;
+		temp.z = center.z;
+		nodes.push_back(temp.x);
+		nodes.push_back(temp.y);
+		nodes.push_back(temp.z);
+		num_inner++;
+		i--;
+	}
 }
 
 void setupVertices(void) {
@@ -181,21 +226,12 @@ void setupVertices(void) {
 	glEnableVertexAttribArray(vColorLoc);
 
 	circle1.clear();
-	glm::vec3 center_cir;
-	center_cir.x = 0.0f;  center_cir.y = 0.0f;  center_cir.z = 2.0f;
-	circle1 = circle(center_cir, R, true);
-
-	color_cir.clear();
-	color_cir = setcolor(col_1, num_cir);
+	glm::vec3 cen;  cen.x = 0, cen.y = 0, cen.z = 2.0;
+	glm::vec3 top;  top.x = 0.0, top.y = 2.0, top.z = 3.0;
+	drawTail(cen, 2.0, top, circle1, num_tail);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
 	glBufferData(GL_ARRAY_BUFFER, circle1.size() * 4, &circle1[0], GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
-	glBufferData(GL_ARRAY_BUFFER, color_cir.size() * 4, &color_cir[0], GL_STATIC_DRAW);
-	vColorLoc = glGetAttribLocation(renderingProgram, "vColor");
-	glVertexAttribPointer(vColorLoc, 4, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(vColorLoc);
 }
 
 void init(GLFWwindow* window) {
@@ -230,7 +266,7 @@ void display(GLFWwindow* window, double currentTime) {
 	mvStack.push(mvStack.top());
 	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 	mvStack.push(mvStack.top());
-	mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(1.0, 0.0, 0.0));
+	mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
 
 	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
@@ -242,7 +278,7 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(0);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, num_cir); //绘制
+	glDrawArrays(GL_TRIANGLES, 0, num_cir1 + num_cir2 + num_cy); //绘制
 
 	mvStack.pop();  // the final pop is for the view matrix
 }
