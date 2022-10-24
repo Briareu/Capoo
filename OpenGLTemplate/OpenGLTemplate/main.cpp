@@ -333,7 +333,7 @@ void setupVertices(void) {
 	//Ô²×¶
 	circle1.clear();
 	glm::vec3 cen;  cen.x = 0, cen.y = 0, cen.z = 0.0;
-	glm::vec3 top;  top.x = 0.0, top.y = 2.2, top.z = 1.0;
+	glm::vec3 top;  top.x = 0.0, top.y = 2.2, top.z = 1.5;
 	drawTail(cen, 2.0, top, circle1, num_tail);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
 	glBufferData(GL_ARRAY_BUFFER, circle1.size() * 4, &circle1[0], GL_STATIC_DRAW);
@@ -375,8 +375,9 @@ void init(GLFWwindow* window) {
 	glfwGetFramebufferSize(window, &width, &height);
 	aspect = (float)width / (float)height;
 	pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
+	mvMat = glm::lookAt(glm::vec3(-8.2, 4.5, 1), glm::vec3(-6.3, 4.2, 0), glm::vec3(0.5, 1.8, 0));
 
-	cameraX = 0.0f; cameraY = 0.0f; cameraZ = 12.0f;
+	cameraX = -7.0f; cameraY = 0.0f; cameraZ = 5.0f;
 	setupVertices();
 }
 
@@ -398,7 +399,7 @@ void display(GLFWwindow* window, double currentTime) {
 	GLuint gLoc = glGetUniformLocation(renderingProgram, "gcolor");
 	GLuint bLoc = glGetUniformLocation(renderingProgram, "bcolor");
 
-	mvMat = glm::lookAt(glm::vec3(0.4, 0.5, 1.3), glm::vec3(0.1, 0.7, 0), glm::vec3(-0.2, 2.0, 0));
+	//mvMat = glm::lookAt(glm::vec3(8, 4.5, 1), glm::vec3(6.3, 4.2, 0), glm::vec3(0.5, 1.8, 0));
 
 	vMat = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
 	mvStack.push(vMat);
@@ -408,10 +409,12 @@ void display(GLFWwindow* window, double currentTime) {
 
 	//mvStack.pop();
 
-
 	//»æÖÆÉíÌå£¨Ô²ÖùÌå£©
 	mvStack.push(mvStack.top());
-	mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
+	mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 0.0, 1.0));
+	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0, 1.0, 0.0));
+	mvStack.push(mvStack.top());
+	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(1, 1, 0.7));
 	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
 	glUniform1f(rLoc, 0.0f);
 	glUniform1f(gLoc, 0.6f);
@@ -420,29 +423,29 @@ void display(GLFWwindow* window, double currentTime) {
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(0);
 	glDrawArrays(GL_TRIANGLES, 0, num_cir1 + num_cir2 + num_cy); //»æÖÆ
-	//mvStack.pop();
+	mvStack.pop();
 
 
 	//»æÖÆÎ²°Í£¨Ô²×¶£©
 	mvStack.push(mvStack.top());
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 2));
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 1.4));
 	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
 	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
 	glUniform1f(rLoc, 0.0f);
-	glUniform1f(gLoc, 0.6f);
+	glUniform1f(gLoc, 0.4f);
 	glUniform1f(bLoc, 1.0f);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(0);
 	glDrawArrays(GL_TRIANGLES, 0, num_tail);
 	mvStack.pop();
-	mvStack.pop();
+	//mvStack.pop();
 
 
 	//»æÖÆÁ³£¨ÇòÌå£©
 	mvStack.push(mvStack.top());
-	mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -2));
+	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -1.4));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
 	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(2, 2, 2));
 	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
@@ -458,15 +461,15 @@ void display(GLFWwindow* window, double currentTime) {
 
 	//»æÖÆ¶ú¶ä£¨×ó£©
 	mvStack.push(mvStack.top());
-	mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0.4, -1.0));
+	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0.4, -0.4));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(145.0f), glm::vec3(0.0, 1.0, 0.0));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(-66.0f), glm::vec3(1.0, 0.0, 0.0));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0, 0.0, 1.0));
 	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(0.6, 0.6, 0.6));
 	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
-	glUniform1f(rLoc, 0.0f);
-	glUniform1f(gLoc, 0.6f);
+	glUniform1f(rLoc, 0.1f);
+	glUniform1f(gLoc, 0.4f);
 	glUniform1f(bLoc, 1.0f);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -476,15 +479,15 @@ void display(GLFWwindow* window, double currentTime) {
 
 	//»æÖÆ¶ú¶ä£¨ÓÒ£©
 	mvStack.push(mvStack.top());
-	mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0.4, -1));
+	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0.4, -0.4));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(-145.0f), glm::vec3(0.0, 1.0, 0.0));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(-66.0f), glm::vec3(1.0, 0.0, 0.0));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0, 0.0, 1.0));
 	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(0.6, 0.6, 0.6));
 	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
-	glUniform1f(rLoc, 0.0f);
-	glUniform1f(gLoc, 0.6f);
+	glUniform1f(rLoc, 0.1f);
+	glUniform1f(gLoc, 0.4f);
 	glUniform1f(bLoc, 1.0f);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -494,8 +497,8 @@ void display(GLFWwindow* window, double currentTime) {
 
 	//»æÖÆÑÛ¾¦£¨×ó£©
 	mvStack.push(mvStack.top());
-	mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.6, 0.2, -2.88));
+	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.6, 0.2, -2.28));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
 	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(1, 1, 1));
 	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
@@ -510,8 +513,8 @@ void display(GLFWwindow* window, double currentTime) {
 
 	//»æÖÆÑÛ¾¦£¨ÓÒ£©
 	mvStack.push(mvStack.top());
-	mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(-0.6, 0.2, -2.88));
+	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(-0.6, 0.2, -2.28));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
 	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(1, 1, 1));
 	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
@@ -524,9 +527,13 @@ void display(GLFWwindow* window, double currentTime) {
 	glDrawElements(GL_TRIANGLES, X_SEGMENTS * Y_SEGMENTS * 6, GL_UNSIGNED_INT, 0); //»æÖÆ
 	mvStack.pop();
 
+	mvStack.pop(); //È¥³ýÐý×ª
+
 	//ÅÜ²½»úµÄ³¤·½Ìå
 	//glBindVertexArray(vao[1]);
 	mvStack.push(mvStack.top());
+	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(0.9, 1, 0.8));
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -0.4));
 	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
 	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[5]);
@@ -534,7 +541,7 @@ void display(GLFWwindow* window, double currentTime) {
 	//glEnableVertexAttribArray(1);
 	//glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
 	//glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
-	glUniform1f(rLoc, 0.44f);
+	glUniform1f(rLoc, 0.6f);
 	glUniform1f(gLoc, 0.5f);
 	glUniform1f(bLoc, 0.56f);
 	glEnableVertexAttribArray(0);
@@ -545,8 +552,8 @@ void display(GLFWwindow* window, double currentTime) {
 	mvStack.push(mvStack.top());
 	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.76, 8.0, 1.78));
-	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(0.7, 2.0, 0.092));
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.5, 8.0, 1.2));
+	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(0.6, 2.0, 0.09));
 	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[5]);
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
@@ -564,8 +571,8 @@ void display(GLFWwindow* window, double currentTime) {
 	mvStack.push(mvStack.top());
 	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.76, 8.0, -1.78));
-	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(0.7, 2.0, 0.092));
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.5, 8.0, -1.6));
+	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(0.6, 2.0, 0.09));
 	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[5]);
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
@@ -585,8 +592,8 @@ void display(GLFWwindow* window, double currentTime) {
 	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0.0, -0.9));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.76, 8.0, -2.78));
-	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(0.43, 2.0, 0.092));
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(-0.4, 6.0, -1.8));
+	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(0.62, 2.0, 0.092));
 	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[5]);
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
@@ -607,6 +614,7 @@ void window_size_callback(GLFWwindow* win, int newWidth, int newHeight) {
 	aspect = (float)newWidth / (float)newHeight;
 	glViewport(0, 0, newWidth, newHeight);
 	pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
+	//mvMat = glm::lookAt(glm::vec3(1.5, 0.9, 2), glm::vec3(0, 0, 0), glm::vec3(0.0, 1.0, 0));
 }
 
 int main(void)
