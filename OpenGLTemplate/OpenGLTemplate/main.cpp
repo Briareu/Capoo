@@ -14,7 +14,7 @@ using namespace std;
 #define M_PI acos(-1)
 
 #define numVAOs 2
-#define numVBOs 7
+#define numVBOs 5
 
 float cameraX, cameraY, cameraZ;
 GLuint renderingProgram;
@@ -27,17 +27,23 @@ int width, height;
 float aspect;
 glm::mat4 pMat, vMat, mMat, mvMat;
 
+glm::vec3 cameraPos = glm::vec3(5.0f, 0.0f, 5.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);//-6.3, 4.2, 0
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 int num_cir1 = 0, num_cir2 = 0, num_cy = 0;
 int num_tail = 0;
-//将球横纵划分成50*50的网格
-const int Y_SEGMENTS = 50;
-const int X_SEGMENTS = 50;
+bool firstMouse = true;
 
 stack<glm::mat4> mvStack;
 
+//将球横纵划分成50*50的网格
+const int Y_SEGMENTS = 50;
+const int X_SEGMENTS = 50;
 vector<float> sphereVertices;
 vector<int> sphereIndices;
+float lastX = 400, lastY = 300;//mouse
+float yaw = 0.0f, pitch = 0.0f;
 
 
 void setColor(std::vector<float> &color, int num_inner, glm::vec3 col) {
@@ -345,28 +351,14 @@ void setupVertices(void) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
 	glBufferData(GL_ARRAY_BUFFER, pyrnode.size() * 4, &pyrnode[0], GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
-	glBufferData(GL_ARRAY_BUFFER, color_cir.size() * 4, &color_cir[0], GL_STATIC_DRAW);
-	vColorLoc = glGetAttribLocation(renderingProgram, "vColor");
-	glVertexAttribPointer(vColorLoc, 4, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(vColorLoc);
-
 	circle1.clear();
 	drawCube(circle1);
 	//glBindVertexArray(vao[1]);
 	//glGenBuffers(numVBOs, vbo);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[5]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
 	glBufferData(GL_ARRAY_BUFFER, circle1.size() * 4, &circle1[0], GL_STATIC_DRAW);
 
-	color_cir.clear();
-	col_1.x = 0.0f;  col_1.y = 0.5f;  col_1.z = 0.5f;
-	setColor(color_cir, 36, col_1);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
-	glBufferData(GL_ARRAY_BUFFER, color_cir.size() * 4, &color_cir[0], GL_STATIC_DRAW);
-	vColorLoc = glGetAttribLocation(renderingProgram, "vColor");
-	glVertexAttribPointer(vColorLoc, 4, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(vColorLoc);
 }
 
 void init(GLFWwindow* window) {
@@ -375,8 +367,8 @@ void init(GLFWwindow* window) {
 	glfwGetFramebufferSize(window, &width, &height);
 	aspect = (float)width / (float)height;
 	pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
-	mvMat = glm::lookAt(glm::vec3(-8.2, 4.5, 1), glm::vec3(-6.3, 4.2, 0), glm::vec3(0.5, 1.8, 0));
-
+	//mvMat = glm::lookAt(glm::vec3(-8.0, 4.5, 1), glm::vec3(-6.3, 4.2, 0), glm::vec3(0.5, 1.8, 0));
+	mvMat = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 	cameraX = -7.0f; cameraY = 0.0f; cameraZ = 5.0f;
 	setupVertices();
 }
@@ -536,7 +528,7 @@ void display(GLFWwindow* window, double currentTime) {
 	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -0.4));
 	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
 	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[5]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 	//glEnableVertexAttribArray(1);
 	//glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
@@ -552,10 +544,10 @@ void display(GLFWwindow* window, double currentTime) {
 	mvStack.push(mvStack.top());
 	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.5, 8.0, 1.2));
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.35, 7.4, 1.2));
 	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(0.6, 2.0, 0.09));
 	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[5]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 	//glEnableVertexAttribArray(1);
 	//glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
@@ -571,10 +563,10 @@ void display(GLFWwindow* window, double currentTime) {
 	mvStack.push(mvStack.top());
 	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.5, 8.0, -1.6));
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.35, 7.4, -1.2));
 	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(0.6, 2.0, 0.09));
 	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[5]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 	//glEnableVertexAttribArray(1);
 	//glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
@@ -589,13 +581,13 @@ void display(GLFWwindow* window, double currentTime) {
 	//中间的棍子
 	mvStack.push(mvStack.top());
 	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0.0, -0.9));
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(-1.3, 0.0, 0.4));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
 	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(-0.4, 6.0, -1.8));
 	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(0.62, 2.0, 0.092));
 	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[5]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 	//glEnableVertexAttribArray(1);
 	//glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
@@ -617,6 +609,60 @@ void window_size_callback(GLFWwindow* win, int newWidth, int newHeight) {
 	//mvMat = glm::lookAt(glm::vec3(1.5, 0.9, 2), glm::vec3(0, 0, 0), glm::vec3(0.0, 1.0, 0));
 }
 
+void processInput(GLFWwindow *window, int key, int scancode, int action, int mods) {
+	if (action != GLFW_PRESS)
+		return;
+
+	float cameraSpeed = 0.05f; // adjust accordingly
+	switch (key)
+	{
+	case GLFW_KEY_W:
+		cameraPos += cameraSpeed * cameraFront;
+		break;
+	case GLFW_KEY_S:
+		cameraPos -= cameraSpeed * cameraFront;
+		break;
+	case GLFW_KEY_A:
+		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+		break;
+	case GLFW_KEY_D:
+		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+		break;
+	case GLFW_KEY_LEFT:
+	{
+		cameraFront.x -= 0.01f;
+		break;
+	}
+	case GLFW_KEY_RIGHT:
+	{
+		cameraFront.x += 0.01f;
+		break;
+	}
+	case GLFW_KEY_UP:
+	{
+		cameraFront.y += 0.01f;
+		break;
+	}
+	case GLFW_KEY_DOWN:
+	{
+		cameraFront.y -= 0.01f;
+		break;
+	}
+	default:
+		break;
+	}
+	/*if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		cameraPos += cameraSpeed * cameraFront;
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		cameraPos -= cameraSpeed * cameraFront;
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;*/
+
+	mvMat = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+}
+
 int main(void)
 {
 	if (!glfwInit())
@@ -626,7 +672,7 @@ int main(void)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
-	GLFWwindow* window = glfwCreateWindow(600, 600, "Stack", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(600, 600, "Capoo", NULL, NULL);
 	glfwMakeContextCurrent(window);
 	if (glewInit() != GLEW_OK)
 	{
@@ -635,6 +681,7 @@ int main(void)
 	glfwSwapInterval(1);
 
 	glfwSetWindowSizeCallback(window, window_size_callback);
+	glfwSetKeyCallback(window, processInput);
 
 	init(window);
 
