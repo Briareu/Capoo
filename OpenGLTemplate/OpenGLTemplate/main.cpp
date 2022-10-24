@@ -27,7 +27,7 @@ int width, height;
 float aspect;
 glm::mat4 pMat, vMat, mMat, mvMat;
 
-glm::vec3 cameraPos = glm::vec3(5.0f, 0.0f, 5.0f);
+glm::vec3 cameraPos = glm::vec3(5.0f, 3.0f, 5.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);//-6.3, 4.2, 0
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -613,7 +613,7 @@ void processInput(GLFWwindow *window, int key, int scancode, int action, int mod
 	if (action != GLFW_PRESS)
 		return;
 
-	float cameraSpeed = 0.05f; // adjust accordingly
+	float cameraSpeed = 0.1f; // adjust accordingly
 	switch (key)
 	{
 	case GLFW_KEY_W:
@@ -630,22 +630,26 @@ void processInput(GLFWwindow *window, int key, int scancode, int action, int mod
 		break;
 	case GLFW_KEY_LEFT:
 	{
-		cameraFront.x -= 0.01f;
+		cameraFront.y += 0.2f;
+		//cameraX -= 0.5f;
 		break;
 	}
 	case GLFW_KEY_RIGHT:
 	{
-		cameraFront.x += 0.01f;
+		cameraFront.y -= 0.2f;
+		//cameraX += 0.5f;
 		break;
 	}
 	case GLFW_KEY_UP:
 	{
-		cameraFront.y += 0.01f;
+		//cameraFront.y += 0.5f;
+		cameraY += 0.5f;
 		break;
 	}
 	case GLFW_KEY_DOWN:
 	{
-		cameraFront.y -= 0.01f;
+		//cameraFront.y -= 0.5f;
+		cameraY -= 0.5f;
 		break;
 	}
 	default:
