@@ -16,7 +16,6 @@ using namespace std;
 #define numVAOs 2
 #define numVBOs 5
 
-float cameraX, cameraY, cameraZ;
 GLuint renderingProgram;
 GLuint vao[numVAOs];
 GLuint vbo[numVBOs];
@@ -24,26 +23,30 @@ GLuint vbo[numVBOs];
 // variable allocation for display
 GLuint mvLoc, projLoc, vColorLoc, viewLoc;
 int width, height;
-float aspect;
+GLfloat aspect;
 glm::mat4 pMat, vMat, mMat, mvMat;
+stack<glm::mat4> mvStack;
 
-glm::vec3 cameraPos = glm::vec3(5.0f, 3.0f, 5.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);//-6.3, 4.2, 0
+//Camera
+float cameraX, cameraY, cameraZ;
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+GLfloat fov = 45.0f;
+GLfloat lastX = 300, lastY = 300; //初始值设置为屏幕的中心
+bool firstMouse = true;
+GLfloat yaw = -90.0f;	// Yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right (due to how Eular angles work) so we initially rotate a bit to the left.
+GLfloat pitch = 0.0f;
+//鼠标输入
+bool keys[1024];
 
 int num_cir1 = 0, num_cir2 = 0, num_cy = 0;
 int num_tail = 0;
-bool firstMouse = true;
-
-stack<glm::mat4> mvStack;
-
 //将球横纵划分成50*50的网格
 const int Y_SEGMENTS = 50;
 const int X_SEGMENTS = 50;
 vector<float> sphereVertices;
 vector<int> sphereIndices;
-float lastX = 400, lastY = 300;//mouse
-float yaw = 0.0f, pitch = 0.0f;
 
 
 void setColor(std::vector<float> &color, int num_inner, glm::vec3 col) {
@@ -353,23 +356,24 @@ void setupVertices(void) {
 
 	circle1.clear();
 	drawCube(circle1);
-	//glBindVertexArray(vao[1]);
-	//glGenBuffers(numVBOs, vbo);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
 	glBufferData(GL_ARRAY_BUFFER, circle1.size() * 4, &circle1[0], GL_STATIC_DRAW);
-
 }
 
 void init(GLFWwindow* window) {
 	renderingProgram = Utils::createShaderProgram("vertShader.glsl", "fragShader.glsl");
 
 	glfwGetFramebufferSize(window, &width, &height);
-	aspect = (float)width / (float)height;
-	pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
-	//mvMat = glm::lookAt(glm::vec3(-8.0, 4.5, 1), glm::vec3(-6.3, 4.2, 0), glm::vec3(0.5, 1.8, 0));
-	mvMat = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-	cameraX = -7.0f; cameraY = 0.0f; cameraZ = 5.0f;
+	pMat = glm::perspective(fov, (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);
+
+	/*
+	GLfloat radius = 10.0f;
+	GLfloat camX = sin(glfwGetTime()) * radius;
+	GLfloat camZ = cos(glfwGetTime()) * radius;
+	mvMat = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+	*/
+	cameraX = 0.0f; cameraY = 0.0f; cameraZ = 10.0f;
 	setupVertices();
 }
 
@@ -393,11 +397,14 @@ void display(GLFWwindow* window, double currentTime) {
 
 	//mvMat = glm::lookAt(glm::vec3(8, 4.5, 1), glm::vec3(6.3, 4.2, 0), glm::vec3(0.5, 1.8, 0));
 
+	mvMat = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+
 	vMat = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
 	mvStack.push(vMat);
 
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(mvMat));
+
 
 	//mvStack.pop();
 
@@ -530,9 +537,6 @@ void display(GLFWwindow* window, double currentTime) {
 	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
-	//glEnableVertexAttribArray(1);
-	//glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
-	//glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glUniform1f(rLoc, 0.6f);
 	glUniform1f(gLoc, 0.5f);
 	glUniform1f(bLoc, 0.56f);
@@ -544,14 +548,11 @@ void display(GLFWwindow* window, double currentTime) {
 	mvStack.push(mvStack.top());
 	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.35, 7.4, 1.2));
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.3, 7.5, 1.0));
 	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(0.6, 2.0, 0.09));
 	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
-	//glEnableVertexAttribArray(1);
-	//glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
-	//glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glUniform1f(rLoc, 0.44f);
 	glUniform1f(gLoc, 0.5f);
 	glUniform1f(bLoc, 0.56f);
@@ -563,14 +564,11 @@ void display(GLFWwindow* window, double currentTime) {
 	mvStack.push(mvStack.top());
 	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.35, 7.4, -1.2));
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.3, 7.5, -1.6));
 	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(0.6, 2.0, 0.09));
 	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
-	//glEnableVertexAttribArray(1);
-	//glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
-	//glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glUniform1f(rLoc, 0.44f);
 	glUniform1f(gLoc, 0.5f);
 	glUniform1f(bLoc, 0.56f);
@@ -581,17 +579,14 @@ void display(GLFWwindow* window, double currentTime) {
 	//中间的棍子
 	mvStack.push(mvStack.top());
 	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(-1.3, 0.0, 0.4));
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0.0, -0.9));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(-0.4, 6.0, -1.8));
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.6, 7.5, -1.7));
 	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(0.62, 2.0, 0.092));
 	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
 	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
-	//glEnableVertexAttribArray(1);
-	//glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
-	//glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glUniform1f(rLoc, 0.44f);
 	glUniform1f(gLoc, 0.5f);
 	glUniform1f(bLoc, 0.56f);
@@ -602,69 +597,98 @@ void display(GLFWwindow* window, double currentTime) {
 	mvStack.pop();  // the final pop is for the view matrix
 }
 
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
+{
+	if (action == GLFW_PRESS)
+		keys[key] = true;
+	else if (action == GLFW_RELEASE)
+		keys[key] = false;
+
+	GLfloat cameraSpeed = 0.05f;
+	if (key == GLFW_KEY_W)
+		cameraPos += cameraSpeed * cameraFront;
+	if (key == GLFW_KEY_S)
+		cameraPos -= cameraSpeed * cameraFront;
+	if (key == GLFW_KEY_A)
+		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+	if (key == GLFW_KEY_D)
+		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+	if (key == GLFW_KEY_END)  //end键退出程序
+		exit(EXIT_SUCCESS);
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
+	GLfloat xoffset = xpos - lastX;
+	GLfloat yoffset = lastY - ypos;
+	lastX = xpos;
+	lastY = ypos;
+
+	GLfloat sensitivity = 0.05;
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+	yaw += xoffset;
+	pitch += yoffset;
+
+	if (pitch > 89.0f)
+		pitch = 89.0f;
+	if (pitch < -89.0f)
+		pitch = -89.0f;
+
+	glm::vec3 front;
+	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	front.y = sin(glm::radians(pitch));
+	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	cameraFront = glm::normalize(front);
+}
+
+//鼠标滚轮的回调函数
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	if (fov >= 1.0f && fov <= 45.0f)
+		fov -= yoffset;
+	if (fov <= 1.0f)
+		fov = 1.0f;
+	if (fov >= 45.0f)
+		fov = 45.0f;
+}
+
+void do_movement()
+{
+	// 摄像机控制
+	GLfloat cameraSpeed = 0.01f;
+	if (keys[GLFW_KEY_W])
+		cameraPos += cameraSpeed * cameraFront;
+	if (keys[GLFW_KEY_S])
+		cameraPos -= cameraSpeed * cameraFront;
+	if (keys[GLFW_KEY_A])
+		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+	if (keys[GLFW_KEY_D])
+		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+
+	if (keys[GLFW_KEY_UP])
+		cameraY += 0.1f;
+	if (keys[GLFW_KEY_DOWN])
+		cameraY -= 0.1f;
+	if (keys[GLFW_KEY_RIGHT])
+		cameraZ += 0.1f;
+	if (keys[GLFW_KEY_LEFT])
+		cameraZ -= 0.1f;
+}
+
 void window_size_callback(GLFWwindow* win, int newWidth, int newHeight) {
 	aspect = (float)newWidth / (float)newHeight;
 	glViewport(0, 0, newWidth, newHeight);
-	pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
+	//pMat = glm::perspective(fov, aspect, 0.1f, 1000.0f);
 	//mvMat = glm::lookAt(glm::vec3(1.5, 0.9, 2), glm::vec3(0, 0, 0), glm::vec3(0.0, 1.0, 0));
-}
-
-void processInput(GLFWwindow *window, int key, int scancode, int action, int mods) {
-	if (action != GLFW_PRESS)
-		return;
-
-	float cameraSpeed = 0.1f; // adjust accordingly
-	switch (key)
-	{
-	case GLFW_KEY_W:
-		cameraPos += cameraSpeed * cameraFront;
-		break;
-	case GLFW_KEY_S:
-		cameraPos -= cameraSpeed * cameraFront;
-		break;
-	case GLFW_KEY_A:
-		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-		break;
-	case GLFW_KEY_D:
-		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-		break;
-	case GLFW_KEY_LEFT:
-	{
-		cameraFront.y += 0.2f;
-		//cameraX -= 0.5f;
-		break;
-	}
-	case GLFW_KEY_RIGHT:
-	{
-		cameraFront.y -= 0.2f;
-		//cameraX += 0.5f;
-		break;
-	}
-	case GLFW_KEY_UP:
-	{
-		//cameraFront.y += 0.5f;
-		cameraY += 0.5f;
-		break;
-	}
-	case GLFW_KEY_DOWN:
-	{
-		//cameraFront.y -= 0.5f;
-		cameraY -= 0.5f;
-		break;
-	}
-	default:
-		break;
-	}
-	/*if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		cameraPos += cameraSpeed * cameraFront;
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		cameraPos -= cameraSpeed * cameraFront;
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;*/
-
-	mvMat = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 }
 
 int main(void)
@@ -676,7 +700,7 @@ int main(void)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
-	GLFWwindow* window = glfwCreateWindow(600, 600, "Capoo", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(600, 600, "Stack", NULL, NULL);
 	glfwMakeContextCurrent(window);
 	if (glewInit() != GLEW_OK)
 	{
@@ -685,7 +709,11 @@ int main(void)
 	glfwSwapInterval(1);
 
 	glfwSetWindowSizeCallback(window, window_size_callback);
-	glfwSetKeyCallback(window, processInput);
+	glfwSetKeyCallback(window, key_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	init(window);
 
@@ -693,6 +721,7 @@ int main(void)
 		display(window, glfwGetTime());
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+		do_movement();
 	}
 
 	glfwDestroyWindow(window);
