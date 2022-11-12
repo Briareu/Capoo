@@ -51,7 +51,7 @@ vector<int> sphereIndices;
 float toRadians(float degrees) { return (degrees * 2.0f * 3.14159f) / 360.0f; }
 
 //light-related
-glm::vec3 lightLoc = glm::vec3(-0.0f, 0.0f, 5.0f);
+glm::vec3 lightLoc = glm::vec3(5.0f, 0.0f, 5.0f);
 float amt = 0.0f;
 GLuint globalAmbLoc, ambLoc, diffLoc, specLoc, posLoc, mambLoc, mdiffLoc, mspecLoc, mshiLoc;
 float lightPos[3];
@@ -63,11 +63,44 @@ float lightAmbient[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 float lightDiffuse[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 float lightSpecular[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-// gold material
-float* matAmb = Utils::goldAmbient();
-float* matDif = Utils::goldDiffuse();
-float* matSpe = Utils::goldSpecular();
-float matShi = Utils::goldShininess();
+//material blue
+float matAmbBlue[4] = { 0.28f,0.66f,1.00f,1.00f };
+float matDifBlue[4] = { 0.49f,0.74f,1.00f,1.00f };
+float matSpeBlue[4] = { 0.33f,0.42f,1.00f,1.00f };
+float matShiBlue = 20;
+//material black
+float matAmbBlack[4] = { 0.0f,0.0f,0.0f,0.0f };
+float matDifBlack[4] = { 0.0f,0.0f,0.0f,0.0f };
+float matSpeBlack[4] = { 0.0f,0.0f,0.0f,0.0f };
+float matShiBlack = 20;
+//material
+
+//material black
+float* matAmbBron = Utils::bronzeAmbient();
+float* matDifBron = Utils::bronzeDiffuse();
+float* matSpeBron = Utils::bronzeSpecular();
+float matShiBron = Utils::bronzeShininess();
+
+void setMaterialBlue() {
+	glProgramUniform4fv(renderingProgram, mambLoc, 1, matAmbBlue);
+	glProgramUniform4fv(renderingProgram, mdiffLoc, 1, matDifBlue);
+	glProgramUniform4fv(renderingProgram, mspecLoc, 1, matSpeBlue);
+	glProgramUniform1f(renderingProgram, mshiLoc, matShiBlue);
+}
+
+void setMaterialBlack() {
+	glProgramUniform4fv(renderingProgram, mambLoc, 1, matAmbBlack);
+	glProgramUniform4fv(renderingProgram, mdiffLoc, 1, matDifBlack);
+	glProgramUniform4fv(renderingProgram, mspecLoc, 1, matSpeBlack);
+	glProgramUniform1f(renderingProgram, mshiLoc, matShiBlack);
+}
+
+void setMaterialBron() {
+	glProgramUniform4fv(renderingProgram, mambLoc, 1, matAmbBron);
+	glProgramUniform4fv(renderingProgram, mdiffLoc, 1, matDifBron);
+	glProgramUniform4fv(renderingProgram, mspecLoc, 1, matSpeBron);
+	glProgramUniform1f(renderingProgram, mshiLoc, matShiBron);
+}
 
 void installLights(glm::mat4 vMatrix) {
 	transformed = glm::vec3(vMatrix * glm::vec4(currentLightPos, 1.0));
@@ -92,10 +125,6 @@ void installLights(glm::mat4 vMatrix) {
 	glProgramUniform4fv(renderingProgram, diffLoc, 1, lightDiffuse);
 	glProgramUniform4fv(renderingProgram, specLoc, 1, lightSpecular);
 	glProgramUniform3fv(renderingProgram, posLoc, 1, lightPos);
-	glProgramUniform4fv(renderingProgram, mambLoc, 1, matAmb);
-	glProgramUniform4fv(renderingProgram, mdiffLoc, 1, matDif);
-	glProgramUniform4fv(renderingProgram, mspecLoc, 1, matSpe);
-	glProgramUniform1f(renderingProgram, mshiLoc, matShi);
 }
 
 void setColor(std::vector<float> &color, int num_inner, glm::vec3 col) {
@@ -233,7 +262,7 @@ void drawTail(glm::vec3 center, float R, glm::vec3 top, std::vector<float> &node
 	//R底部半径
 	//num_inner--传全局变量的num_tail
 	for (int i = 0; i < 100; i++) {
-		glm::vec3 dir1, dir2;
+		glm::vec3 dir1, dir2, dir_cir1, dir_cir2;
 		nodes.push_back(top.x);
 		nodes.push_back(top.y);
 		nodes.push_back(top.z);
@@ -250,6 +279,8 @@ void drawTail(glm::vec3 center, float R, glm::vec3 top, std::vector<float> &node
 		dir1.x = temp.x - top.x;
 		dir1.y = temp.y - top.y;
 		dir1.z = temp.z - top.z;
+		dir_cir1 = glm::vec3(temp.x, temp.y, 0);
+		dir_cir1 = glm::normalize(dir_cir1);
 
 		i++;
 		temp.x = R * cos(M_PI * 2 * i / 100) + center.x;
@@ -263,16 +294,24 @@ void drawTail(glm::vec3 center, float R, glm::vec3 top, std::vector<float> &node
 		dir2.x = temp.x - top.x;
 		dir2.y = temp.y - top.y;
 		dir2.z = temp.z - top.z;
+		dir_cir2 = glm::vec3(temp.x, temp.y, 0);
+		dir_cir2 = glm::normalize(dir_cir2);
 
 		glm::vec3 dir;
 		dir = glm::cross(dir1, dir2);
 		dir = glm::normalize(dir);
-		
-		for (int n = 0; n < 3; n++) {
-			normals.push_back(dir.x);
-			normals.push_back(dir.y);
-			normals.push_back(dir.z);
-		}
+
+		normals.push_back(dir.x);
+		normals.push_back(dir.y);
+		normals.push_back(dir.z);
+
+		normals.push_back(dir_cir1.x);
+		normals.push_back(dir_cir1.y);
+		normals.push_back(dir_cir1.z);
+
+		normals.push_back(dir_cir2.x);
+		normals.push_back(dir_cir2.y);
+		normals.push_back(dir_cir2.z);
 	}
 }
 
@@ -315,7 +354,7 @@ void drawEar(std::vector<float> &nodes, std::vector<float> &normals, glm::vec3 t
 	nodes.push_back(node_fr.x);  nodes.push_back(node_fr.y);  nodes.push_back(node_fr.z);//fr
 	dir1 = node_sr - node_top, dir2 = node_fr - node_top;
 	dir = glm::cross(dir1, dir2);
-	dir = glm::normalize(dir); 
+	dir = glm::normalize(dir);
 	for (int i = 0; i < 3; i++) {
 		normals.push_back(dir.x), normals.push_back(dir.y), normals.push_back(dir.z);
 	}
@@ -326,7 +365,7 @@ void drawEar(std::vector<float> &nodes, std::vector<float> &normals, glm::vec3 t
 	dir1 = node_st - node_top, dir2 = node_sr - node_top;
 	dir = glm::cross(dir1, dir2);
 	dir = glm::normalize(dir);
-	dir = glm::normalize(dir); 
+	dir = glm::normalize(dir);
 	for (int i = 0; i < 3; i++) {
 		normals.push_back(dir.x), normals.push_back(dir.y), normals.push_back(dir.z);
 	}
@@ -337,7 +376,7 @@ void drawEar(std::vector<float> &nodes, std::vector<float> &normals, glm::vec3 t
 	dir1 = node_st - node_top, dir2 = node_sl - node_top;
 	dir = glm::cross(dir1, dir2);
 	dir = glm::normalize(dir);
-	dir = glm::normalize(dir); 
+	dir = glm::normalize(dir);
 	for (int i = 0; i < 3; i++) {
 		normals.push_back(dir.x), normals.push_back(dir.y), normals.push_back(dir.z);
 	}
@@ -420,7 +459,7 @@ void drawCylinder(vector<float> &circle1, std::vector<float> &normals,
 		dir_cy = glm::vec3(R * cos(M_PI * 2 * n / 100), R * sin(M_PI * 2 * n / 100), 0);
 		dir_cy = glm::normalize(dir_cy);
 		normals_cy.push_back(dir_cy.x), normals_cy.push_back(dir_cy.y), normals_cy.push_back(dir_cy.z);
-		dir_cy = glm::vec3(R * cos(M_PI * 2 * n / 100), R * sin(M_PI * 2 * n / 100), cir_2.z);
+		dir_cy = glm::vec3(R * cos(M_PI * 2 * n / 100), R * sin(M_PI * 2 * n / 100), 0);
 		dir_cy = glm::normalize(dir_cy);
 		normals_cy.push_back(dir_cy.x), normals_cy.push_back(dir_cy.y), normals_cy.push_back(dir_cy.z);
 
@@ -615,8 +654,9 @@ void display(GLFWwindow* window, double currentTime) {
 	//mvStack.pop();
 
 	//绘制身体（圆柱体）
+	setMaterialBlue();
 	mvStack.push(mvStack.top());
-	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 0.0, 1.0)); 
+	mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 0.0, 1.0));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0, 1.0, 0.0));
 	mvStack.push(mvStack.top());
 	invTrMat = mvStack.top();
@@ -733,6 +773,7 @@ void display(GLFWwindow* window, double currentTime) {
 	mvStack.pop();
 
 	//绘制眼睛（左）
+	setMaterialBlack();
 	mvStack.push(mvStack.top());
 	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
 	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.6, 0.2, -2.28));
@@ -779,6 +820,7 @@ void display(GLFWwindow* window, double currentTime) {
 	mvStack.pop(); //去除旋转
 
 	//跑步机的长方体
+	setMaterialBron();
 	//glBindVertexArray(vao[1]);
 	mvStack.push(mvStack.top()); invTrMat = mvStack.top();
 	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(0.9, 1, 0.8));
@@ -834,11 +876,11 @@ void display(GLFWwindow* window, double currentTime) {
 	invTrMat = glm::transpose(glm::inverse(invTrMat));
 	glUniformMatrix4fv(nLoc, 1, GL_FALSE, glm::value_ptr(invTrMat));
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
-	glVertexAttribPointer(0, 3, GL_FLOAT * 36 * 3, false, 0, 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
-	glVertexAttribPointer(1, 3, GL_FLOAT *36 * 3, false, 0, 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
 	glDrawArrays(GL_TRIANGLES, 0, 36); //绘制
 	mvStack.pop();
@@ -858,11 +900,11 @@ void display(GLFWwindow* window, double currentTime) {
 	invTrMat = glm::transpose(glm::inverse(invTrMat));
 	glUniformMatrix4fv(nLoc, 1, GL_FALSE, glm::value_ptr(invTrMat));
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
-	glVertexAttribPointer(0, 3, GL_FLOAT * 36 * 3, false, 0, 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
-	glVertexAttribPointer(1, 3, GL_FLOAT * 36 * 3, false, 0, 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
 	glDrawArrays(GL_TRIANGLES, 0, 36); //绘制
 	mvStack.pop();
