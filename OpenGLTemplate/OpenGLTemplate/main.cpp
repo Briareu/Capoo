@@ -577,8 +577,8 @@ void display(GLFWwindow* window, double currentTime) {
 	glClear(GL_COLOR_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
-	glEnable(GL_CULL_FACE);
-	glFrontFace(GL_CCW);
+	//glEnable(GL_CULL_FACE);
+	//glFrontFace(GL_CCW);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
@@ -656,11 +656,6 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[7]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
-
-	glEnable(GL_CULL_FACE);
-	glFrontFace(GL_CCW);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
 	glDrawArrays(GL_TRIANGLES, 0, num_tail);
 	mvStack.pop();
 	//mvStack.pop();
@@ -685,11 +680,6 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
-
-	glEnable(GL_CULL_FACE);
-	glFrontFace(GL_CCW);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
 	glDrawElements(GL_TRIANGLES, X_SEGMENTS * Y_SEGMENTS * 6, GL_UNSIGNED_INT, 0); //绘制
 	mvStack.pop();
 
@@ -715,11 +705,6 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[8]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
-
-	glEnable(GL_CULL_FACE);
-	glFrontFace(GL_CCW);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
 	glDrawArrays(GL_TRIANGLES, 0, 21); //绘制
 	mvStack.pop();
 
@@ -744,11 +729,6 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[8]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
-
-	glEnable(GL_CULL_FACE);
-	glFrontFace(GL_CCW);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
 	glDrawArrays(GL_TRIANGLES, 0, 21); //绘制
 	mvStack.pop();
 
@@ -771,11 +751,6 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
-
-	glEnable(GL_CULL_FACE);
-	glFrontFace(GL_CCW);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
 	glDrawElements(GL_TRIANGLES, X_SEGMENTS * Y_SEGMENTS * 6, GL_UNSIGNED_INT, 0); //绘制
 	mvStack.pop();
 
@@ -798,11 +773,6 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
-
-	glEnable(GL_CULL_FACE);
-	glFrontFace(GL_CCW);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
 	glDrawElements(GL_TRIANGLES, X_SEGMENTS * Y_SEGMENTS * 6, GL_UNSIGNED_INT, 0); //绘制
 	mvStack.pop();
 
@@ -826,11 +796,6 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
-
-	glEnable(GL_CULL_FACE);
-	glFrontFace(GL_CCW);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
 	glDrawArrays(GL_TRIANGLES, 0, 36); //绘制
 	mvStack.pop();
 
@@ -853,11 +818,6 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
-
-	glEnable(GL_CULL_FACE);
-	glFrontFace(GL_CCW);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
 	glDrawArrays(GL_TRIANGLES, 0, 36); //绘制
 	mvStack.pop();
 
@@ -874,17 +834,12 @@ void display(GLFWwindow* window, double currentTime) {
 	invTrMat = glm::transpose(glm::inverse(invTrMat));
 	glUniformMatrix4fv(nLoc, 1, GL_FALSE, glm::value_ptr(invTrMat));
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
-	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT * 36 * 3, false, 0, 0);
 	glEnableVertexAttribArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
-	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT *36 * 3, false, 0, 0);
 	glEnableVertexAttribArray(1);
-
-	glEnable(GL_CULL_FACE);
-	glFrontFace(GL_CCW);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
 	glDrawArrays(GL_TRIANGLES, 0, 36); //绘制
 	mvStack.pop();
 
@@ -903,17 +858,12 @@ void display(GLFWwindow* window, double currentTime) {
 	invTrMat = glm::transpose(glm::inverse(invTrMat));
 	glUniformMatrix4fv(nLoc, 1, GL_FALSE, glm::value_ptr(invTrMat));
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
-	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT * 36 * 3, false, 0, 0);
 	glEnableVertexAttribArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
-	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT * 36 * 3, false, 0, 0);
 	glEnableVertexAttribArray(1);
-
-	glEnable(GL_CULL_FACE);
-	glFrontFace(GL_CCW);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
 	glDrawArrays(GL_TRIANGLES, 0, 36); //绘制
 	mvStack.pop();
 

@@ -135,17 +135,12 @@ d:\myprogram\opengltemplate\opengltemplate\main.cpp(527): warning C4305: “=”
           [
               T=float
           ]
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(947): warning C4244: “=”: 从“double”转换到“GLfloat”，可能丢失数据
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(948): warning C4244: “=”: 从“double”转换到“GLfloat”，可能丢失数据
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(952): warning C4244: “初始化”: 从“double”转换到“GLfloat”，可能丢失数据
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(953): warning C4244: “初始化”: 从“double”转换到“GLfloat”，可能丢失数据
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(954): warning C4244: “=”: 从“double”转换到“GLfloat”，可能丢失数据
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(955): warning C4244: “=”: 从“double”转换到“GLfloat”，可能丢失数据
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(957): warning C4305: “初始化”: 从“double”到“GLfloat”截断
-d:\myprogram\opengltemplate\opengltemplate\main.cpp(980): warning C4244: “-=”: 从“double”转换到“GLfloat”，可能丢失数据
-LINK : warning LNK4098: 默认库“MSVCRT”与其他库的使用冲突；请使用 /NODEFAULTLIB:library
-soil2.lib(SOIL2.obj) : warning LNK4099: 未找到 PDB“soil2-static-lib.pdb”(使用“soil2.lib(SOIL2.obj)”或在“D:\Myprogram\OpenGLTemplate\Debug\soil2-static-lib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
-soil2.lib(image_DXT.obj) : warning LNK4099: 未找到 PDB“soil2-static-lib.pdb”(使用“soil2.lib(image_DXT.obj)”或在“D:\Myprogram\OpenGLTemplate\Debug\soil2-static-lib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
-soil2.lib(image_helper.obj) : warning LNK4099: 未找到 PDB“soil2-static-lib.pdb”(使用“soil2.lib(image_helper.obj)”或在“D:\Myprogram\OpenGLTemplate\Debug\soil2-static-lib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
-soil2.lib(wfETC.obj) : warning LNK4099: 未找到 PDB“soil2-static-lib.pdb”(使用“soil2.lib(wfETC.obj)”或在“D:\Myprogram\OpenGLTemplate\Debug\soil2-static-lib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(897): warning C4244: “=”: 从“double”转换到“GLfloat”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(898): warning C4244: “=”: 从“double”转换到“GLfloat”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(902): warning C4244: “初始化”: 从“double”转换到“GLfloat”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(903): warning C4244: “初始化”: 从“double”转换到“GLfloat”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(904): warning C4244: “=”: 从“double”转换到“GLfloat”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(905): warning C4244: “=”: 从“double”转换到“GLfloat”，可能丢失数据
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(907): warning C4305: “初始化”: 从“double”到“GLfloat”截断
+d:\myprogram\opengltemplate\opengltemplate\main.cpp(930): warning C4244: “-=”: 从“double”转换到“GLfloat”，可能丢失数据
   OpenGLTemplate.vcxproj -> D:\Myprogram\OpenGLTemplate\Debug\OpenGLTemplate.exe
