@@ -14,7 +14,7 @@ using namespace std;
 #define M_PI acos(-1)
 
 #define numVAOs 2
-#define numVBOs 10//5*2
+#define numVBOs 11//5*2 + 1
 
 GLuint renderingProgram;
 GLuint vao[numVAOs];
@@ -51,7 +51,7 @@ vector<int> sphereIndices;
 float toRadians(float degrees) { return (degrees * 2.0f * 3.14159f) / 360.0f; }
 
 //light-related
-glm::vec3 lightLoc = glm::vec3(5.0f, 0.0f, 5.0f);
+glm::vec3 lightLoc = glm::vec3(5.0f, 6.0f, 5.0f);
 float amt = 0.0f;
 GLuint globalAmbLoc, ambLoc, diffLoc, specLoc, posLoc, mambLoc, mdiffLoc, mspecLoc, mshiLoc;
 float lightPos[3];
@@ -73,6 +73,11 @@ float matAmbBlack[4] = { 0.0f,0.0f,0.0f,0.0f };
 float matDifBlack[4] = { 0.0f,0.0f,0.0f,0.0f };
 float matSpeBlack[4] = { 0.0f,0.0f,0.0f,0.0f };
 float matShiBlack = 20;
+//material yellow
+float matAmbYellow[4] = { 1.00f,0.76f,0.18f,1.00f };
+float matDifYellow[4] = { 0.95f,1.00f,0.32f,1.00f };
+float matSpeYellow[4] = { 0.41f,0.33f,0.52f,1.00f };
+float matShiYellow = 10;
 //material
 
 //material black
@@ -100,6 +105,13 @@ void setMaterialBron() {
 	glProgramUniform4fv(renderingProgram, mdiffLoc, 1, matDifBron);
 	glProgramUniform4fv(renderingProgram, mspecLoc, 1, matSpeBron);
 	glProgramUniform1f(renderingProgram, mshiLoc, matShiBron);
+}
+
+void setMaterialYellow() {
+	glProgramUniform4fv(renderingProgram, mambLoc, 1, matAmbYellow);
+	glProgramUniform4fv(renderingProgram, mdiffLoc, 1, matDifYellow);
+	glProgramUniform4fv(renderingProgram, mspecLoc, 1, matSpeYellow);
+	glProgramUniform1f(renderingProgram, mshiLoc, matShiYellow);
 }
 
 void installLights(glm::mat4 vMatrix) {
@@ -559,6 +571,13 @@ void setupVertices(void) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * 4, &normals[0], GL_STATIC_DRAW);
 
+	for (int i = 0; i < normals.size(); i++) {
+		normals[i] = -normals[i];
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[11]);
+	glBufferData(GL_ARRAY_BUFFER, normals.size() * 4, &normals[0], GL_STATIC_DRAW);
+
 	//圆锥
 	normals.clear();
 	circle1.clear();
@@ -641,14 +660,35 @@ void display(GLFWwindow* window, double currentTime) {
 
 	currentLightPos = glm::vec3(lightLoc.x, lightLoc.y, lightLoc.z);
 	amt += 0.5f;
-	//glm::mat4 rMat = glm::rotate(glm::mat4(1.0f), toRadians(amt), glm::vec3(0.0f, 0.0f, 1.0f));
-	//currentLightPos = glm::vec3(rMat * glm::vec4(currentLightPos, 1.0f));
+	glm::mat4 rMat = glm::rotate(glm::mat4(1.0f), toRadians(amt), glm::vec3(0.0f, 1.0f, 0.0f));
+	currentLightPos = glm::vec3(rMat * glm::vec4(currentLightPos, 1.0f));
 	currentLightPos = glm::vec3(glm::vec4(currentLightPos, 1.0f));
 	invTrMat = glm::transpose(glm::inverse(mvStack.top()));
 	glUniformMatrix4fv(nLoc, 1, GL_FALSE, glm::value_ptr(invTrMat));
 	//set matAmb, matDif, matSpe, matShi
 
+	//light & sun
 	installLights(vMat);
+	setMaterialYellow();
+	mvStack.push(mvStack.top());
+	mvStack.top() *= glm::rotate(glm::mat4(1.0f), toRadians(amt), glm::vec3(0.0f, 1.0f, 0.0f));
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(lightLoc.x + 1.0, lightLoc.y + 1.0, lightLoc.z + 1.0));
+	invTrMat = mvStack.top();
+	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
+	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
+	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(mvMat));
+	invTrMat = glm::transpose(glm::inverse(invTrMat));
+	glUniformMatrix4fv(nLoc, 1, GL_FALSE, glm::value_ptr(invTrMat));
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);//10
+	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glDrawElements(GL_TRIANGLES, X_SEGMENTS * Y_SEGMENTS * 6, GL_UNSIGNED_INT, 0); //绘制
+	mvStack.pop();
 
 
 	//mvStack.pop();
@@ -838,6 +878,7 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
 	glDrawArrays(GL_TRIANGLES, 0, 36); //绘制
 	mvStack.pop();
 
@@ -860,6 +901,7 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
 	glDrawArrays(GL_TRIANGLES, 0, 36); //绘制
 	mvStack.pop();
 
@@ -882,6 +924,7 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
 	glDrawArrays(GL_TRIANGLES, 0, 36); //绘制
 	mvStack.pop();
 
@@ -906,6 +949,7 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
 	glDrawArrays(GL_TRIANGLES, 0, 36); //绘制
 	mvStack.pop();
 
