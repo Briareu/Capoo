@@ -9,12 +9,14 @@
 #include <glm\gtc\type_ptr.hpp> // glm::value_ptr
 #include <glm\gtc\matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
 #include "Utils.h"
+#include "Sphere.h"
+#include "Cube.h"
 using namespace std;
 
 #define M_PI acos(-1)
 
 #define numVAOs 2
-#define numVBOs 11//5*2 + 1
+#define numVBOs 10//5*2+1
 
 GLuint renderingProgram;
 GLuint vao[numVAOs];
@@ -45,17 +47,20 @@ int num_tail = 0;
 //将球横纵划分成50*50的网格
 const int Y_SEGMENTS = 50;
 const int X_SEGMENTS = 50;
-vector<float> sphereVertices;
-vector<int> sphereIndices;
 
 float toRadians(float degrees) { return (degrees * 2.0f * 3.14159f) / 360.0f; }
 
+vector<float> vertices;
+vector<int> indices;
+vector<float> normals;
+
 //light-related
-glm::vec3 lightLoc = glm::vec3(5.0f, 6.0f, 5.0f);
+glm::vec3 lightLoc = glm::vec3(5.0f, 5.0f, 5.0f);
 float amt = 0.0f;
 GLuint globalAmbLoc, ambLoc, diffLoc, specLoc, posLoc, mambLoc, mdiffLoc, mspecLoc, mshiLoc;
 float lightPos[3];
 glm::vec3 currentLightPos, transformed;
+glm::vec3 changes = glm::vec3(0.0f, 0.0f, 0.0f);
 
 // white light
 float globalAmbient[4] = { 0.7f, 0.7f, 0.7f, 1.0f };
@@ -73,18 +78,16 @@ float matAmbBlack[4] = { 0.0f,0.0f,0.0f,0.0f };
 float matDifBlack[4] = { 0.0f,0.0f,0.0f,0.0f };
 float matSpeBlack[4] = { 0.0f,0.0f,0.0f,0.0f };
 float matShiBlack = 20;
+//material bronze
+float* matAmbBron = Utils::bronzeAmbient();
+float* matDifBron = Utils::bronzeDiffuse();
+float* matSpeBron = Utils::bronzeSpecular();
+float matShiBron = Utils::bronzeShininess();
 //material yellow
 float matAmbYellow[4] = { 1.00f,0.76f,0.18f,1.00f };
 float matDifYellow[4] = { 0.95f,1.00f,0.32f,1.00f };
 float matSpeYellow[4] = { 0.41f,0.33f,0.52f,1.00f };
 float matShiYellow = 10;
-//material
-
-//material black
-float* matAmbBron = Utils::bronzeAmbient();
-float* matDifBron = Utils::bronzeDiffuse();
-float* matSpeBron = Utils::bronzeSpecular();
-float matShiBron = Utils::bronzeShininess();
 
 void setMaterialBlue() {
 	glProgramUniform4fv(renderingProgram, mambLoc, 1, matAmbBlue);
@@ -137,134 +140,6 @@ void installLights(glm::mat4 vMatrix) {
 	glProgramUniform4fv(renderingProgram, diffLoc, 1, lightDiffuse);
 	glProgramUniform4fv(renderingProgram, specLoc, 1, lightSpecular);
 	glProgramUniform3fv(renderingProgram, posLoc, 1, lightPos);
-}
-
-void setColor(std::vector<float> &color, int num_inner, glm::vec3 col) {
-	for (int i = 0; i < num_inner; i++) {
-		color.push_back(col.x);
-		color.push_back(col.y);
-		color.push_back(col.z);
-		color.push_back(1.0f);
-	}
-}
-
-void drawCube(std::vector<float> &nodes, std::vector<float> &normals, float x = 4.0f, float z = 2.0f, float y = 0.2f) {
-	//up
-	glm::vec3 dir_1(0.0f, 1.0f, 0.0f);
-	nodes.push_back(-x);   nodes.push_back(-2.0f);  nodes.push_back(z);
-	nodes.push_back(-x);  nodes.push_back(-2.0f);  nodes.push_back(-z);
-	nodes.push_back(x);  nodes.push_back(-2.0f);  nodes.push_back(-z);
-	nodes.push_back(x);  nodes.push_back(-2.0f);  nodes.push_back(-z);
-	nodes.push_back(-x);   nodes.push_back(-2.0f);  nodes.push_back(z);
-	nodes.push_back(x);   nodes.push_back(-2.0f);  nodes.push_back(z);
-	for (int i = 0; i < 6; i++) {
-		normals.push_back(dir_1.x);
-		normals.push_back(dir_1.y);
-		normals.push_back(dir_1.z);
-	}
-	//down
-	glm::vec3 dir_2(0.0f, -1.0f, 0.0f);
-	nodes.push_back(-x);   nodes.push_back(-2.0f - y);  nodes.push_back(z);
-	nodes.push_back(-x);  nodes.push_back(-2.0f - y);  nodes.push_back(-z);
-	nodes.push_back(x);  nodes.push_back(-2.0f - y);  nodes.push_back(-z);
-	nodes.push_back(x);  nodes.push_back(-2.0f - y);  nodes.push_back(-z);
-	nodes.push_back(-x);   nodes.push_back(-2.0f - y);  nodes.push_back(z);
-	nodes.push_back(x);   nodes.push_back(-2.0f - y);  nodes.push_back(z);
-	for (int i = 0; i < 6; i++) {
-		normals.push_back(dir_2.x);
-		normals.push_back(dir_2.y);
-		normals.push_back(dir_2.z);
-	}
-	//front
-	glm::vec3 dir_3(0.0f, 0.0f, 1.0f);
-	nodes.push_back(-x);   nodes.push_back(-2.0f);  nodes.push_back(z);
-	nodes.push_back(-x);   nodes.push_back(-2.0f - y);  nodes.push_back(z);
-	nodes.push_back(x);   nodes.push_back(-2.0f);  nodes.push_back(z);
-	nodes.push_back(x);   nodes.push_back(-2.0f);  nodes.push_back(z);
-	nodes.push_back(-x);   nodes.push_back(-2.0f - y);  nodes.push_back(z);
-	nodes.push_back(x);   nodes.push_back(-2.0f - y);  nodes.push_back(z);
-	for (int i = 0; i < 6; i++) {
-		normals.push_back(dir_3.x);
-		normals.push_back(dir_3.y);
-		normals.push_back(dir_3.z);
-	}
-	//back
-	glm::vec3 dir_4(0.0f, 0.0f, -1.0f);
-	nodes.push_back(-x);   nodes.push_back(-2.0f);  nodes.push_back(-z);
-	nodes.push_back(-x);   nodes.push_back(-2.0f - y);  nodes.push_back(-z);
-	nodes.push_back(x);   nodes.push_back(-2.0f);  nodes.push_back(-z);
-	nodes.push_back(x);   nodes.push_back(-2.0f);  nodes.push_back(-z);
-	nodes.push_back(-x);   nodes.push_back(-2.0f - y);  nodes.push_back(-z);
-	nodes.push_back(x);   nodes.push_back(-2.0f - y);  nodes.push_back(-z);
-	for (int i = 0; i < 6; i++) {
-		normals.push_back(dir_4.x);
-		normals.push_back(dir_4.y);
-		normals.push_back(dir_4.z);
-	}
-	//left
-	glm::vec3 dir_5(-1.0f, 0.0f, 0.0f);
-	nodes.push_back(-x);   nodes.push_back(-2.0f);  nodes.push_back(-z);
-	nodes.push_back(-x);   nodes.push_back(-2.0f - y);  nodes.push_back(-z);
-	nodes.push_back(-x);   nodes.push_back(-2.0f);  nodes.push_back(z);
-	nodes.push_back(-x);   nodes.push_back(-2.0f);  nodes.push_back(z);
-	nodes.push_back(-x);   nodes.push_back(-2.0f - y);  nodes.push_back(-z);
-	nodes.push_back(-x);   nodes.push_back(-2.0f - y);  nodes.push_back(z);
-	for (int i = 0; i < 6; i++) {
-		normals.push_back(dir_5.x);
-		normals.push_back(dir_5.y);
-		normals.push_back(dir_5.z);
-	}
-	//right
-	glm::vec3 dir_6(1.0f, 0.0f, 0.0f);
-	nodes.push_back(x);   nodes.push_back(-2.0f);  nodes.push_back(-z);
-	nodes.push_back(x);   nodes.push_back(-2.0f - y);  nodes.push_back(-z);
-	nodes.push_back(x);   nodes.push_back(-2.0f);  nodes.push_back(z);
-	nodes.push_back(x);   nodes.push_back(-2.0f);  nodes.push_back(z);
-	nodes.push_back(x);   nodes.push_back(-2.0f - y);  nodes.push_back(-z);
-	nodes.push_back(x);   nodes.push_back(-2.0f - y);  nodes.push_back(z);
-	for (int i = 0; i < 6; i++) {
-		normals.push_back(dir_6.x);
-		normals.push_back(dir_6.y);
-		normals.push_back(dir_6.z);
-	}
-}
-
-// 绘制球体
-void drawSphere(std::vector<float> &normals)
-{
-	for (int y = 0; y <= Y_SEGMENTS; y++)
-	{
-		for (int x = 0; x <= X_SEGMENTS; x++)
-		{
-			glm::vec3 dir_1;
-			float xSegment = (float)x / (float)X_SEGMENTS;
-			float ySegment = (float)y / (float)Y_SEGMENTS;
-			float xPos = cos(xSegment * 2.0f * M_PI) * std::sin(ySegment * M_PI);
-			float yPos = cos(ySegment * M_PI);
-			float zPos = sin(xSegment * 2.0f * M_PI) * std::sin(ySegment * M_PI);
-			sphereVertices.push_back(xPos);
-			sphereVertices.push_back(yPos);
-			sphereVertices.push_back(zPos);
-			dir_1.x = xPos, dir_1.y = yPos, dir_1.z = zPos;
-			dir_1 = glm::normalize(dir_1);
-			normals.push_back(dir_1.x), normals.push_back(dir_1.y), normals.push_back(dir_1.z);
-		}
-	}
-
-	//生成球的Indices
-	for (int i = 0; i < Y_SEGMENTS; i++)
-	{
-		for (int j = 0; j < X_SEGMENTS; j++)
-		{
-			sphereIndices.push_back(i * (X_SEGMENTS + 1) + j);
-			sphereIndices.push_back((i + 1) * (X_SEGMENTS + 1) + j);
-			sphereIndices.push_back((i + 1) * (X_SEGMENTS + 1) + j + 1);;
-
-			sphereIndices.push_back(i* (X_SEGMENTS + 1) + j);
-			sphereIndices.push_back((i + 1) * (X_SEGMENTS + 1) + j + 1);
-			sphereIndices.push_back(i * (X_SEGMENTS + 1) + j + 1);
-		}
-	}
 }
 
 //绘制圆锥
@@ -532,8 +407,8 @@ void drawCylinder(vector<float> &circle1, std::vector<float> &normals,
 }
 
 void setupVertices(void) {
-	std::vector<float> circle1;
-	std::vector<float> normals;
+	vector<float> circle1;
+	vector<float> normals;
 
 	glm::vec3 col_1;
 	col_1.x = 0.0f;  col_1.y = 0.6f;  col_1.z = 1.0f;
@@ -557,25 +432,20 @@ void setupVertices(void) {
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * 4, &normals[0], GL_STATIC_DRAW);
 
 	//球
-	normals.clear();
-	drawSphere(normals); //生成球的顶点
+	Sphere sphere(X_SEGMENTS, Y_SEGMENTS);
+	vertices = sphere.getVertices();
+	indices = sphere.getIndices();
+	normals = sphere.getNormals();
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-	glBufferData(GL_ARRAY_BUFFER, sphereVertices.size() * sizeof(float), &sphereVertices[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
 
 	GLuint element_buffer_object;//EBO
 	glGenBuffers(1, &element_buffer_object);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer_object);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphereIndices.size() * sizeof(int), &sphereIndices[0], GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), &indices[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
-	glBufferData(GL_ARRAY_BUFFER, normals.size() * 4, &normals[0], GL_STATIC_DRAW);
-
-	for (int i = 0; i < normals.size(); i++) {
-		normals[i] = -normals[i];
-	}
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[11]);
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * 4, &normals[0], GL_STATIC_DRAW);
 
 	//圆锥
@@ -601,12 +471,14 @@ void setupVertices(void) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[8]);
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * 4, &normals[0], GL_STATIC_DRAW);
 
-	normals.clear();
-	circle1.clear();
-	drawCube(circle1, normals);
+	
+	//长方体
+	Cube cube(4.0f, 0.2f, 2.0f);
+	vertices = cube.getVertices();
+	normals = cube.getNormals();
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
-	glBufferData(GL_ARRAY_BUFFER, circle1.size() * 4, &circle1[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * 4, &vertices[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * 4, &normals[0], GL_STATIC_DRAW);
@@ -618,12 +490,6 @@ void init(GLFWwindow* window) {
 	glfwGetFramebufferSize(window, &width, &height);
 	pMat = glm::perspective(fov, (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);
 
-	/*
-	GLfloat radius = 10.0f;
-	GLfloat camX = sin(glfwGetTime()) * radius;
-	GLfloat camZ = cos(glfwGetTime()) * radius;
-	mvMat = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-	*/
 	cameraX = 0.0f; cameraY = 0.0f; cameraZ = 10.0f;
 	setupVertices();
 }
@@ -647,8 +513,6 @@ void display(GLFWwindow* window, double currentTime) {
 	viewLoc = glGetUniformLocation(renderingProgram, "view_matrix");
 	nLoc = glGetUniformLocation(renderingProgram, "norm_matrix");
 
-	//mvMat = glm::lookAt(glm::vec3(8, 4.5, 1), glm::vec3(6.3, 4.2, 0), glm::vec3(0.5, 1.8, 0));
-
 	mvMat = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
 	vMat = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
@@ -659,10 +523,10 @@ void display(GLFWwindow* window, double currentTime) {
 
 
 	currentLightPos = glm::vec3(lightLoc.x, lightLoc.y, lightLoc.z);
-	amt += 0.5f;
-	glm::mat4 rMat = glm::rotate(glm::mat4(1.0f), toRadians(amt), glm::vec3(0.0f, 1.0f, 0.0f));
-	currentLightPos = glm::vec3(rMat * glm::vec4(currentLightPos, 1.0f));
-	currentLightPos = glm::vec3(glm::vec4(currentLightPos, 1.0f));
+	//amt += 0.5f;
+	glm::mat4 tMat = glm::translate(glm::mat4(1.0f), glm::vec3(changes.x, changes.y, changes.z));
+	currentLightPos = glm::vec3(tMat * glm::vec4(currentLightPos, 1.0f));
+	//currentLightPos = glm::vec3(glm::vec4(currentLightPos, 1.0f));
 	invTrMat = glm::transpose(glm::inverse(mvStack.top()));
 	glUniformMatrix4fv(nLoc, 1, GL_FALSE, glm::value_ptr(invTrMat));
 	//set matAmb, matDif, matSpe, matShi
@@ -672,7 +536,7 @@ void display(GLFWwindow* window, double currentTime) {
 	setMaterialYellow();
 	mvStack.push(mvStack.top());
 	mvStack.top() *= glm::rotate(glm::mat4(1.0f), toRadians(amt), glm::vec3(0.0f, 1.0f, 0.0f));
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(lightLoc.x + 1.0, lightLoc.y + 1.0, lightLoc.z + 1.0));
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(lightLoc.x + changes.x + 1.0, lightLoc.y + changes.y + 1.0, lightLoc.z + changes.z + 1.0));
 	invTrMat = mvStack.top();
 	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
@@ -691,12 +555,10 @@ void display(GLFWwindow* window, double currentTime) {
 	mvStack.pop();
 
 
-	//mvStack.pop();
-
 	//绘制身体（圆柱体）
 	setMaterialBlue();
 	mvStack.push(mvStack.top());
-	mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 0.0, 1.0));
+	mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 0.0, 1.0)); 
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0, 1.0, 0.0));
 	mvStack.push(mvStack.top());
 	invTrMat = mvStack.top();
@@ -901,8 +763,7 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
-	glDrawArrays(GL_TRIANGLES, 0, 36); //绘制
+	glDrawArrays(GL_TRIANGLES, 0, 108); //绘制
 	mvStack.pop();
 
 	//右边的棍子
@@ -924,7 +785,6 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
 	glDrawArrays(GL_TRIANGLES, 0, 36); //绘制
 	mvStack.pop();
 
@@ -949,7 +809,6 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
 	glDrawArrays(GL_TRIANGLES, 0, 36); //绘制
 	mvStack.pop();
 
@@ -1041,6 +900,19 @@ void do_movement()
 		cameraZ += 0.1f;
 	if (keys[GLFW_KEY_LEFT])
 		cameraZ -= 0.1f;
+
+	if (keys[GLFW_KEY_U])
+		changes.y += 0.1f;
+	if (keys[GLFW_KEY_J])
+		changes.y -= 0.1f;
+	if (keys[GLFW_KEY_H])
+		changes.x += 0.1f;
+	if (keys[GLFW_KEY_K])
+		changes.x -= 0.1f;
+	if (keys[GLFW_KEY_N])
+		changes.z += 0.1f;
+	if (keys[GLFW_KEY_M])
+		changes.z -= 0.1f;
 }
 
 void window_size_callback(GLFWwindow* win, int newWidth, int newHeight) {
