@@ -61,6 +61,7 @@ GLuint globalAmbLoc, ambLoc, diffLoc, specLoc, posLoc, mambLoc, mdiffLoc, mspecL
 float lightPos[3];
 glm::vec3 currentLightPos, transformed;
 glm::vec3 changes = glm::vec3(0.0f, 0.0f, 0.0f);
+float rotating = 0.0f;
 
 // white light
 float globalAmbient[4] = { 0.7f, 0.7f, 0.7f, 1.0f };
@@ -524,10 +525,11 @@ void display(GLFWwindow* window, double currentTime) {
 
 	currentLightPos = glm::vec3(lightLoc.x, lightLoc.y, lightLoc.z);
 	//amt += 0.5f;
+	glm::mat4 rMat = glm::rotate(glm::mat4(1.0f), toRadians(rotating), glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::mat4 tMat = glm::translate(glm::mat4(1.0f), glm::vec3(changes.x, changes.y, changes.z));
-	currentLightPos = glm::vec3(tMat * glm::vec4(currentLightPos, 1.0f));
+	currentLightPos = glm::vec3(rMat * tMat * glm::vec4(currentLightPos, 1.0f));
 	//currentLightPos = glm::vec3(glm::vec4(currentLightPos, 1.0f));
-	invTrMat = glm::transpose(glm::inverse(mvStack.top()));
+	invTrMat = glm::transpose(glm::inverse(rMat * tMat * mvStack.top()));
 	glUniformMatrix4fv(nLoc, 1, GL_FALSE, glm::value_ptr(invTrMat));
 	//set matAmb, matDif, matSpe, matShi
 
@@ -535,6 +537,7 @@ void display(GLFWwindow* window, double currentTime) {
 	installLights(vMat);
 	setMaterialYellow();
 	mvStack.push(mvStack.top());
+	mvStack.top() *= glm::rotate(glm::mat4(1.0f), toRadians(rotating), glm::vec3(0.0f, 1.0f, 0.0f));
 	mvStack.top() *= glm::rotate(glm::mat4(1.0f), toRadians(amt), glm::vec3(0.0f, 1.0f, 0.0f));
 	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(lightLoc.x + changes.x + 1.0, lightLoc.y + changes.y + 1.0, lightLoc.z + changes.z + 1.0));
 	invTrMat = mvStack.top();
@@ -913,6 +916,11 @@ void do_movement()
 		changes.z += 0.1f;
 	if (keys[GLFW_KEY_M])
 		changes.z -= 0.1f;
+
+	if (keys[GLFW_KEY_O])
+		rotating += 0.1f;
+	if (keys[GLFW_KEY_P])
+		rotating -= 0.1f;
 }
 
 void window_size_callback(GLFWwindow* win, int newWidth, int newHeight) {
