@@ -50,8 +50,7 @@ void Utils::printShaderLog(GLuint shader) {
 }
 
 GLuint Utils::prepareShader(int shaderTYPE, const char *shaderPath)
-{
-	GLint shaderCompiled;
+{	GLint shaderCompiled;
 	string shaderStr = readShaderFile(shaderPath);
 	const char *shaderSrc = shaderStr.c_str();
 	GLuint shaderRef = glCreateShader(shaderTYPE);
@@ -60,8 +59,7 @@ GLuint Utils::prepareShader(int shaderTYPE, const char *shaderPath)
 	checkOpenGLError();
 	glGetShaderiv(shaderRef, GL_COMPILE_STATUS, &shaderCompiled);
 	if (shaderCompiled != 1)
-	{
-		if (shaderTYPE == 35633) cout << "Vertex ";
+	{	if (shaderTYPE == 35633) cout << "Vertex ";
 		if (shaderTYPE == 36488) cout << "Tess Control ";
 		if (shaderTYPE == 36487) cout << "Tess Eval ";
 		if (shaderTYPE == 36313) cout << "Geometry ";
@@ -86,21 +84,18 @@ void Utils::printProgramLog(int prog) {
 }
 
 int Utils::finalizeShaderProgram(GLuint sprogram)
-{
-	GLint linked;
+{	GLint linked;
 	glLinkProgram(sprogram);
 	checkOpenGLError();
 	glGetProgramiv(sprogram, GL_LINK_STATUS, &linked);
 	if (linked != 1)
-	{
-		cout << "linking failed" << endl;
+	{	cout << "linking failed" << endl;
 		printProgramLog(sprogram);
 	}
 	return sprogram;
 }
 
-GLuint Utils::createShaderProgram(const char *vp, const char *fp)
-{
+GLuint Utils::createShaderProgram(const char *vp, const char *fp) {
 	GLuint vShader = prepareShader(GL_VERTEX_SHADER, vp);
 	GLuint fShader = prepareShader(GL_FRAGMENT_SHADER, fp);
 	GLuint vfprogram = glCreateProgram();
@@ -110,8 +105,7 @@ GLuint Utils::createShaderProgram(const char *vp, const char *fp)
 	return vfprogram;
 }
 
-GLuint Utils::createShaderProgram(const char *vp, const char *gp, const char *fp) 
-{
+GLuint Utils::createShaderProgram(const char *vp, const char *gp, const char *fp) {
 	GLuint vShader = prepareShader(GL_VERTEX_SHADER, vp);
 	GLuint gShader = prepareShader(GL_GEOMETRY_SHADER, gp);
 	GLuint fShader = prepareShader(GL_FRAGMENT_SHADER, fp);
@@ -123,8 +117,7 @@ GLuint Utils::createShaderProgram(const char *vp, const char *gp, const char *fp
 	return vgfprogram;
 }
 
-GLuint Utils::createShaderProgram(const char *vp, const char *tCS, const char* tES, const char *fp)
-{
+GLuint Utils::createShaderProgram(const char *vp, const char *tCS, const char* tES, const char *fp) {
 	GLuint vShader = prepareShader(GL_VERTEX_SHADER, vp);
 	GLuint tcShader = prepareShader(GL_TESS_CONTROL_SHADER, tCS);
 	GLuint teShader = prepareShader(GL_TESS_EVALUATION_SHADER, tES);
@@ -138,8 +131,7 @@ GLuint Utils::createShaderProgram(const char *vp, const char *tCS, const char* t
 	return vtfprogram;
 }
 
-GLuint Utils::createShaderProgram(const char *vp, const char *tCS, const char* tES, char *gp, const char *fp)
-{
+GLuint Utils::createShaderProgram(const char *vp, const char *tCS, const char* tES, char *gp, const char *fp) {
 	GLuint vShader = prepareShader(GL_VERTEX_SHADER, vp);
 	GLuint tcShader = prepareShader(GL_TESS_CONTROL_SHADER, tCS);
 	GLuint teShader = prepareShader(GL_TESS_EVALUATION_SHADER, tES);
@@ -175,8 +167,7 @@ GLuint Utils::loadCubeMap(const char *mapDir) {
 }
 
 GLuint Utils::loadTexture(const char *texImagePath)
-{
-	GLuint textureRef;
+{	GLuint textureRef;
 	textureRef = SOIL_load_OGL_texture(texImagePath, SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_INVERT_Y);
 	if (textureRef == 0) cout << "didnt find texture file " << texImagePath << endl;
 	// ----- mipmap/anisotropic section

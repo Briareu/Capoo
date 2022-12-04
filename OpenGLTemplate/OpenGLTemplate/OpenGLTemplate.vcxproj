@@ -134,6 +134,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="fragShader.glsl" />
+    <None Include="skyfrag.glsl" />
+    <None Include="skyvert.glsl" />
     <None Include="vertShader.glsl" />
   </ItemGroup>
   <ItemGroup>

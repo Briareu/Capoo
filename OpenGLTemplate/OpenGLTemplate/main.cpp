@@ -1,4 +1,4 @@
-#include <GL\glew.h>
+Ôªø#include <GL\glew.h>
 #include <GLFW\glfw3.h>
 #include <string>
 #include <iostream>
@@ -16,9 +16,12 @@ using namespace std;
 #define M_PI acos(-1)
 
 #define numVAOs 2
-#define numVBOs 10//5*2+1
+#define numVBOs 11//5*2+1+1+1
+GLuint skyboxVAO, skyboxVBO;
 
-GLuint renderingProgram;
+GLuint brickTexture, skyboxTexture;
+
+GLuint renderingProgram, skyProgram;
 GLuint vao[numVAOs];
 GLuint vbo[numVBOs];
 
@@ -35,16 +38,16 @@ glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 GLfloat fov = 45.0f;
-GLfloat lastX = 300, lastY = 300; //≥ı º÷µ…Ë÷√Œ™∆¡ƒªµƒ÷––ƒ
+GLfloat lastX = 300, lastY = 300; //ÂàùÂßãÂÄºËÆæÁΩÆ‰∏∫Â±èÂπïÁöÑ‰∏≠ÂøÉ
 bool firstMouse = true;
 GLfloat yaw = -90.0f;	// Yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right (due to how Eular angles work) so we initially rotate a bit to the left.
 GLfloat pitch = 0.0f;
-// Û±Í ‰»Î
+//Èº†Ê†áËæìÂÖ•
 bool keys[1024];
 
 int num_cir1 = 0, num_cir2 = 0, num_cy = 0;
 int num_tail = 0;
-//Ω´«Ú∫·◊›ªÆ∑÷≥…50*50µƒÕ¯∏Ò
+//Â∞ÜÁêÉÊ®™Á∫µÂàíÂàÜÊàê50*50ÁöÑÁΩëÊ†º
 const int Y_SEGMENTS = 50;
 const int X_SEGMENTS = 50;
 
@@ -104,13 +107,6 @@ void setMaterialBlack() {
 	glProgramUniform1f(renderingProgram, mshiLoc, matShiBlack);
 }
 
-void setMaterialBron() {
-	glProgramUniform4fv(renderingProgram, mambLoc, 1, matAmbBron);
-	glProgramUniform4fv(renderingProgram, mdiffLoc, 1, matDifBron);
-	glProgramUniform4fv(renderingProgram, mspecLoc, 1, matSpeBron);
-	glProgramUniform1f(renderingProgram, mshiLoc, matShiBron);
-}
-
 void setMaterialYellow() {
 	glProgramUniform4fv(renderingProgram, mambLoc, 1, matAmbYellow);
 	glProgramUniform4fv(renderingProgram, mdiffLoc, 1, matDifYellow);
@@ -130,10 +126,10 @@ void installLights(glm::mat4 vMatrix) {
 	diffLoc = glGetUniformLocation(renderingProgram, "light.diffuse");
 	specLoc = glGetUniformLocation(renderingProgram, "light.specular");
 	posLoc = glGetUniformLocation(renderingProgram, "light.position");
-	mambLoc = glGetUniformLocation(renderingProgram, "material.ambient");
-	mdiffLoc = glGetUniformLocation(renderingProgram, "material.diffuse");
-	mspecLoc = glGetUniformLocation(renderingProgram, "material.specular");
-	mshiLoc = glGetUniformLocation(renderingProgram, "material.shininess");
+	mambLoc = glGetUniformLocation(renderingProgram, "material0.ambient");
+	mdiffLoc = glGetUniformLocation(renderingProgram, "material0.diffuse");
+	mspecLoc = glGetUniformLocation(renderingProgram, "material0.specular");
+	mshiLoc = glGetUniformLocation(renderingProgram, "material0.shininess");
 
 	//  set the uniform light and material values in the shader
 	glProgramUniform4fv(renderingProgram, globalAmbLoc, 1, globalAmbient);
@@ -143,12 +139,12 @@ void installLights(glm::mat4 vMatrix) {
 	glProgramUniform3fv(renderingProgram, posLoc, 1, lightPos);
 }
 
-//ªÊ÷∆‘≤◊∂
+//ÁªòÂà∂ÂúÜÈî•
 void drawTail(glm::vec3 center, float R, glm::vec3 top, std::vector<float> &nodes, std::vector<float> &normals, int &num_inner) {
-	//centerµ◊≤ø‘≤–ƒ
-	//node_top∂•µ„
-	//Rµ◊≤ø∞Îæ∂
-	//num_inner--¥´»´æ÷±‰¡øµƒnum_tail
+	//centerÂ∫ïÈÉ®ÂúÜÂøÉ
+	//node_topÈ°∂ÁÇπ
+	//RÂ∫ïÈÉ®ÂçäÂæÑ
+	//num_inner--‰º†ÂÖ®Â±ÄÂèòÈáèÁöÑnum_tail
 	for (int i = 0; i < 100; i++) {
 		glm::vec3 dir1, dir2, dir_cir1, dir_cir2;
 		nodes.push_back(top.x);
@@ -203,7 +199,7 @@ void drawTail(glm::vec3 center, float R, glm::vec3 top, std::vector<float> &node
 	}
 }
 
-//ªÊ÷∆∂˙∂‰£®Àƒ¿‚◊∂£©
+//ÁªòÂà∂ËÄ≥ÊúµÔºàÂõõÊ£±Èî•Ôºâ
 void drawEar(std::vector<float> &nodes, std::vector<float> &normals, glm::vec3 temp) {
 	glm::vec3 node_top, node_fl, node_fr, node_sl, node_sr, node_st, node_end;
 	glm::vec3 dir1, dir2, dir;
@@ -407,7 +403,52 @@ void drawCylinder(vector<float> &circle1, std::vector<float> &normals,
 	normals.insert(normals.end(), normals_cy.begin(), normals_cy.end());
 }
 
+//Âä†ËΩΩÂ§©Á©∫Áõí
+GLuint loadCubemap(vector<const GLchar*> faces)
+{
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+	//glActiveTexture(GL_TEXTURE0);
+
+	int width, height;
+	unsigned char* image;
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+	for (GLuint i = 0; i < faces.size(); i++)
+	{
+		image = SOIL_load_image(faces[i], &width, &height, 0, SOIL_LOAD_RGB);
+		glTexImage2D(
+			GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0,
+			GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image
+		);
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+	return textureID;
+}
+
 void setupVertices(void) {
+	float textureCoordinates[72] =
+	{ 
+		0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f
+	};
+
 	vector<float> circle1;
 	vector<float> normals;
 
@@ -421,6 +462,104 @@ void setupVertices(void) {
 
 	int R = 2.0f;
 	drawCylinder(circle1, normals, cir_1, cir_2, R);
+	/*
+	GLfloat skyboxVertices[] = {
+		// Positions          
+		-100.0f,  100.0f, -100.0f,
+		-100.0f, -100.0f, -100.0f,
+		 100.0f, -100.0f, -100.0f,
+		 100.0f, -100.0f, -100.0f,
+		 100.0f,  100.0f, -100.0f,
+		-100.0f,  100.0f, -100.0f,
+
+		-100.0f, -100.0f,  100.0f,
+		-100.0f, -100.0f, -100.0f,
+		-100.0f,  100.0f, -100.0f,
+		-100.0f,  100.0f, -100.0f,
+		-100.0f,  100.0f,  100.0f,
+		-100.0f, -100.0f,  100.0f,
+
+		 100.0f, -100.0f, -100.0f,
+		 100.0f, -100.0f,  100.0f,
+		 100.0f,  100.0f,  100.0f,
+		 100.0f,  100.0f,  100.0f,
+		 100.0f,  100.0f, -100.0f,
+		 100.0f, -100.0f, -100.0f,
+
+		-100.0f, -100.0f,  100.0f,
+		-100.0f,  100.0f,  100.0f,
+		 100.0f,  100.0f,  100.0f,
+		 100.0f,  100.0f,  100.0f,
+		 100.0f, -100.0f,  100.0f,
+		-100.0f, -100.0f,  100.0f,
+
+		-100.0f,  100.0f, -100.0f,
+		 100.0f,  100.0f, -100.0f,
+		 100.0f,  100.0f,  100.0f,
+		 100.0f,  100.0f,  100.0f,
+		-100.0f,  100.0f,  100.0f,
+		-100.0f,  100.0f, -100.0f,
+
+		-100.0f, -100.0f, -100.0f,
+		-100.0f, -100.0f,  100.0f,
+		 100.0f, -100.0f, -100.0f,
+		 100.0f, -100.0f, -100.0f,
+		-100.0f, -100.0f,  100.0f,
+		 100.0f, -100.0f,  100.0f
+	};*/
+
+	GLfloat skyboxVertices[] = {
+		// Positions          
+		-1.0f,  1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+		 1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		 1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		-1.0f,  1.0f, -1.0f,
+		 1.0f,  1.0f, -1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		 1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		 1.0f, -1.0f,  1.0f
+	};
+
+	// Cubemap (Skybox)
+	// Setup skybox VAO
+	glGenVertexArrays(1, &skyboxVAO);
+	glBindVertexArray(skyboxVAO);
+	glGenBuffers(1, &skyboxVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
 
 	glGenVertexArrays(1, vao);
 	glBindVertexArray(vao[0]);
@@ -432,7 +571,7 @@ void setupVertices(void) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[5]);
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * 4, &normals[0], GL_STATIC_DRAW);
 
-	//«Ú
+	//ÁêÉ
 	Sphere sphere(X_SEGMENTS, Y_SEGMENTS);
 	vertices = sphere.getVertices();
 	indices = sphere.getIndices();
@@ -449,7 +588,7 @@ void setupVertices(void) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * 4, &normals[0], GL_STATIC_DRAW);
 
-	//‘≤◊∂
+	//ÂúÜÈî•
 	normals.clear();
 	circle1.clear();
 	glm::vec3 cen;  cen.x = 0, cen.y = 0, cen.z = 0.0;
@@ -461,7 +600,7 @@ void setupVertices(void) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[7]);
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * 4, &normals[0], GL_STATIC_DRAW);
 
-	//∂˙∂‰£®¿‚◊∂£©
+	//ËÄ≥ÊúµÔºàÊ£±Èî•Ôºâ
 	normals.clear();
 	vector<float> pyrnode;
 	glm::vec3 topear;  topear.x = 0.0, topear.y = 1.0, topear.z = 2.0;
@@ -472,8 +611,8 @@ void setupVertices(void) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[8]);
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * 4, &normals[0], GL_STATIC_DRAW);
 
-	
-	//≥§∑ΩÃÂ
+
+	//ÈïøÊñπ‰Ωì
 	Cube cube(4.0f, 0.2f, 2.0f);
 	vertices = cube.getVertices();
 	normals = cube.getNormals();
@@ -483,16 +622,36 @@ void setupVertices(void) {
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * 4, &normals[0], GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[10]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(textureCoordinates), textureCoordinates, GL_STATIC_DRAW);
+
+
+	//glEnableVertexAttribArray(0);
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	//glBindVertexArray(0);
+	
+	vector<const GLchar*> faces;
+	faces.push_back("skybox/right.jpg");
+	faces.push_back("skybox/left.jpg");
+	faces.push_back("skybox/top.jpg");
+	faces.push_back("skybox/bottom.jpg");
+	faces.push_back("skybox/back.jpg");
+	faces.push_back("skybox/front.jpg");
+	skyboxTexture = loadCubemap(faces);
 }
 
 void init(GLFWwindow* window) {
 	renderingProgram = Utils::createShaderProgram("vertShader.glsl", "fragShader.glsl");
+	skyProgram = Utils::createShaderProgram("skyvert.glsl", "skyfrag.glsl");
 
 	glfwGetFramebufferSize(window, &width, &height);
 	pMat = glm::perspective(fov, (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);
 
 	cameraX = 0.0f; cameraY = 0.0f; cameraZ = 10.0f;
 	setupVertices();
+
+	brickTexture = Utils::loadTexture("brick1.jpg");
 }
 
 void display(GLFWwindow* window, double currentTime) {
@@ -503,7 +662,7 @@ void display(GLFWwindow* window, double currentTime) {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	//glEnable(GL_CULL_FACE);
-	//glFrontFace(GL_CCW);
+	glFrontFace(GL_CCW);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
@@ -513,6 +672,7 @@ void display(GLFWwindow* window, double currentTime) {
 	projLoc = glGetUniformLocation(renderingProgram, "proj_matrix");
 	viewLoc = glGetUniformLocation(renderingProgram, "view_matrix");
 	nLoc = glGetUniformLocation(renderingProgram, "norm_matrix");
+	GLuint flag= glGetUniformLocation(renderingProgram, "flag");
 
 	mvMat = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
@@ -521,7 +681,6 @@ void display(GLFWwindow* window, double currentTime) {
 
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(mvMat));
-
 
 	currentLightPos = glm::vec3(lightLoc.x, lightLoc.y, lightLoc.z);
 	//amt += 0.5f;
@@ -541,6 +700,7 @@ void display(GLFWwindow* window, double currentTime) {
 	mvStack.top() *= glm::rotate(glm::mat4(1.0f), toRadians(amt), glm::vec3(0.0f, 1.0f, 0.0f));
 	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(lightLoc.x + changes.x + 1.0, lightLoc.y + changes.y + 1.0, lightLoc.z + changes.z + 1.0));
 	invTrMat = mvStack.top();
+	glUniform1i(flag, 0);
 	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(mvMat));
@@ -554,14 +714,14 @@ void display(GLFWwindow* window, double currentTime) {
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-	glDrawElements(GL_TRIANGLES, X_SEGMENTS * Y_SEGMENTS * 6, GL_UNSIGNED_INT, 0); //ªÊ÷∆
+	glDrawElements(GL_TRIANGLES, X_SEGMENTS * Y_SEGMENTS * 6, GL_UNSIGNED_INT, 0); //ÁªòÂà∂
 	mvStack.pop();
 
 
-	//ªÊ÷∆…ÌÃÂ£®‘≤÷˘ÃÂ£©
+	//ÁªòÂà∂Ë∫´‰ΩìÔºàÂúÜÊü±‰ΩìÔºâ
 	setMaterialBlue();
 	mvStack.push(mvStack.top());
-	mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 0.0, 1.0)); 
+	mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 0.0, 1.0));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0, 1.0, 0.0));
 	mvStack.push(mvStack.top());
 	invTrMat = mvStack.top();
@@ -580,11 +740,11 @@ void display(GLFWwindow* window, double currentTime) {
 	glEnableVertexAttribArray(1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	glDrawArrays(GL_TRIANGLES, 0, num_cir1 + num_cir2 + num_cy); //ªÊ÷∆
+	glDrawArrays(GL_TRIANGLES, 0, num_cir1 + num_cir2 + num_cy); //ÁªòÂà∂
 	mvStack.pop();
 
 
-	//ªÊ÷∆Œ≤∞Õ£®‘≤◊∂£©
+	//ÁªòÂà∂Â∞æÂ∑¥ÔºàÂúÜÈî•Ôºâ
 	mvStack.push(mvStack.top());
 	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 1.4));
 	invTrMat = mvStack.top();
@@ -605,8 +765,7 @@ void display(GLFWwindow* window, double currentTime) {
 	mvStack.pop();
 	//mvStack.pop();
 
-
-	//ªÊ÷∆¡≥£®«ÚÃÂ£©
+	//ÁªòÂà∂ËÑ∏ÔºàÁêÉ‰ΩìÔºâ
 	mvStack.push(mvStack.top());
 	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
 	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -1.4));
@@ -625,11 +784,11 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
-	glDrawElements(GL_TRIANGLES, X_SEGMENTS * Y_SEGMENTS * 6, GL_UNSIGNED_INT, 0); //ªÊ÷∆
+	glDrawElements(GL_TRIANGLES, X_SEGMENTS * Y_SEGMENTS * 6, GL_UNSIGNED_INT, 0); //ÁªòÂà∂
 	mvStack.pop();
 
 
-	//ªÊ÷∆∂˙∂‰£®◊Û£©
+	//ÁªòÂà∂ËÄ≥ÊúµÔºàÂ∑¶Ôºâ
 	mvStack.push(mvStack.top());
 	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
 	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0.4, -0.4));
@@ -650,10 +809,10 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[8]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
-	glDrawArrays(GL_TRIANGLES, 0, 21); //ªÊ÷∆
+	glDrawArrays(GL_TRIANGLES, 0, 21); //ÁªòÂà∂
 	mvStack.pop();
 
-	//ªÊ÷∆∂˙∂‰£®”“£©
+	//ÁªòÂà∂ËÄ≥ÊúµÔºàÂè≥Ôºâ
 	mvStack.push(mvStack.top());
 	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
 	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0.4, -0.4));
@@ -674,10 +833,10 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[8]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
-	glDrawArrays(GL_TRIANGLES, 0, 21); //ªÊ÷∆
+	glDrawArrays(GL_TRIANGLES, 0, 21); //ÁªòÂà∂
 	mvStack.pop();
 
-	//ªÊ÷∆—€æ¶£®◊Û£©
+	//ÁªòÂà∂ÁúºÁùõÔºàÂ∑¶Ôºâ
 	setMaterialBlack();
 	mvStack.push(mvStack.top());
 	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
@@ -697,10 +856,10 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
-	glDrawElements(GL_TRIANGLES, X_SEGMENTS * Y_SEGMENTS * 6, GL_UNSIGNED_INT, 0); //ªÊ÷∆
+	glDrawElements(GL_TRIANGLES, X_SEGMENTS * Y_SEGMENTS * 6, GL_UNSIGNED_INT, 0); //ÁªòÂà∂
 	mvStack.pop();
 
-	//ªÊ÷∆—€æ¶£®”“£©
+	//ÁªòÂà∂ÁúºÁùõÔºàÂè≥Ôºâ
 	mvStack.push(mvStack.top());
 	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
 	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(-0.6, 0.2, -2.28));
@@ -719,13 +878,15 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
-	glDrawElements(GL_TRIANGLES, X_SEGMENTS * Y_SEGMENTS * 6, GL_UNSIGNED_INT, 0); //ªÊ÷∆
+	glDrawElements(GL_TRIANGLES, X_SEGMENTS * Y_SEGMENTS * 6, GL_UNSIGNED_INT, 0); //ÁªòÂà∂
 	mvStack.pop();
 
-	mvStack.pop(); //»•≥˝–˝◊™
+	mvStack.pop(); //ÂéªÈô§ÊóãËΩ¨
 
-	//≈‹≤Ωª˙µƒ≥§∑ΩÃÂ
-	setMaterialBron();
+	glUniform1i(flag, 1);
+	glUniform1i(glGetUniformLocation(renderingProgram, "material1.diffuse"), 0);
+	//Ë∑ëÊ≠•Êú∫ÁöÑÈïøÊñπ‰Ωì
+	//setMaterialBron();
 	//glBindVertexArray(vao[1]);
 	mvStack.push(mvStack.top()); invTrMat = mvStack.top();
 	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(0.9, 1, 0.8));
@@ -744,10 +905,18 @@ void display(GLFWwindow* window, double currentTime) {
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
-	glDrawArrays(GL_TRIANGLES, 0, 36); //ªÊ÷∆
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[10]);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(2);
+
+	//glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, brickTexture);
+
+	glDrawArrays(GL_TRIANGLES, 0, 36); //ÁªòÂà∂
 	mvStack.pop();
 
-	//◊Û±ﬂµƒπ˜◊”
+	//Â∑¶ËæπÁöÑÊ£çÂ≠ê
 	mvStack.push(mvStack.top());
 	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
@@ -766,10 +935,10 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
-	glDrawArrays(GL_TRIANGLES, 0, 108); //ªÊ÷∆
+	glDrawArrays(GL_TRIANGLES, 0, 108); //ÁªòÂà∂
 	mvStack.pop();
 
-	//”“±ﬂµƒπ˜◊”
+	//Âè≥ËæπÁöÑÊ£çÂ≠ê
 	mvStack.push(mvStack.top());
 	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
 	mvStack.top() *= rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
@@ -788,10 +957,10 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
-	glDrawArrays(GL_TRIANGLES, 0, 36); //ªÊ÷∆
+	glDrawArrays(GL_TRIANGLES, 0, 36); //ÁªòÂà∂
 	mvStack.pop();
 
-	//÷–º‰µƒπ˜◊”
+	//‰∏≠Èó¥ÁöÑÊ£çÂ≠ê
 	mvStack.push(mvStack.top());
 	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
 	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0.0, -0.9));
@@ -812,8 +981,30 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
-	glDrawArrays(GL_TRIANGLES, 0, 36); //ªÊ÷∆
+	glDrawArrays(GL_TRIANGLES, 0, 36); //ÁªòÂà∂
 	mvStack.pop();
+
+	// Draw skybox as last
+	//glDepthMask(GL_FALSE);
+	glUseProgram(skyProgram);
+
+	glDepthFunc(GL_LEQUAL);  // Change depth function so depth test passes when values are equal to depth buffer's content
+
+	mvStack.push(mvStack.top());
+	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(100, 100, 100));
+	//glm::mat4 view = glm::mat4(glm::mat3(mvStack.top()));	// Remove any translation component of the view matrix
+	glUniformMatrix4fv(glGetUniformLocation(skyProgram, "view"), 1, GL_FALSE, glm::value_ptr(mvMat));
+	glUniformMatrix4fv(glGetUniformLocation(skyProgram, "projection"), 1, GL_FALSE, glm::value_ptr(pMat));
+	glUniformMatrix4fv(glGetUniformLocation(skyProgram, "mv_matrix"), 1, GL_FALSE, glm::value_ptr(glm::mat4(glm::mat3(mvStack.top()))));
+	// skybox cube
+	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
+
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glDepthFunc(GL_LESS); // Set depth function back to default
 
 	mvStack.pop();  // the final pop is for the view matrix
 }
@@ -834,7 +1025,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 	if (key == GLFW_KEY_D)
 		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-	if (key == GLFW_KEY_END)  //endº¸ÕÀ≥ˆ≥Ã–Ú
+	if (key == GLFW_KEY_END)  //endÈîÆÈÄÄÂá∫Á®ãÂ∫è
 		exit(EXIT_SUCCESS);
 }
 
@@ -871,7 +1062,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	cameraFront = glm::normalize(front);
 }
 
-// Û±Íπˆ¬÷µƒªÿµ˜∫Ø ˝
+//Èº†Ê†áÊªöËΩÆÁöÑÂõûË∞ÉÂáΩÊï∞
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	if (fov >= 1.0f && fov <= 45.0f)
@@ -884,7 +1075,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 void do_movement()
 {
-	// …„œÒª˙øÿ÷∆
+	// ÊëÑÂÉèÊú∫ÊéßÂà∂
 	GLfloat cameraSpeed = 0.01f;
 	if (keys[GLFW_KEY_W])
 		cameraPos += cameraSpeed * cameraFront;
