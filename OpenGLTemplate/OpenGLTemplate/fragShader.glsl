@@ -64,9 +64,15 @@ void main(void)
 	   fragColor = vec4((ambient + diffuse + specular), 1.0);
 	}
 	else{
-	   vec3 diffuse = light.diffuse.xyz * max(cosTheta,0.0) * vec3(texture(material1.diffuse, tc));
+	   /*vec3 diffuse = light.diffuse.xyz * max(cosTheta,0.0) * vec3(texture(material1.diffuse, tc));
 	   vec3 ambient = (globalAmbient * vec4(texture(material1.diffuse, tc)) +light.ambient * vec4(texture(material1.diffuse, tc))).xyz;
 	   vec3 specular = light.specular.xyz * material1.specular.xyz * pow(max(cosPhi,0.0), material1.shininess);
-	   fragColor = vec4((ambient + diffuse + specular), 1.0);
+	   fragColor = vec4((ambient + diffuse + specular), 1.0);*/
+	   
+	   vec3 ambient = ((globalAmbient * material0.ambient) + (light.ambient * material0.ambient)).xyz;
+       vec3 diffuse = light.diffuse.xyz * material0.diffuse.xyz * max(cosTheta,0.0);
+	   vec3 specular = light.specular.xyz * material0.specular.xyz * pow(max(cosPhi,0.0), material0.shininess);
+	   vec4 lightColor = vec4((ambient + diffuse + specular), 1.0);
+	   fragColor = 0.5 * lightColor + 0.5 * vec4(vec3(texture(material1.diffuse, tc)), 1.0);
 	}
 }
