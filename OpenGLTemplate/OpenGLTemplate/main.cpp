@@ -58,7 +58,7 @@ vector<int> indices;
 vector<float> normals;
 
 //light-related
-glm::vec3 lightLoc = glm::vec3(25.0f, 25.0f, 25.0f);
+glm::vec3 lightLoc = glm::vec3(5.0f, 5.0f, 5.0f);
 float amt = 0.0f;
 GLuint globalAmbLoc, ambLoc, diffLoc, specLoc, posLoc, mambLoc, mdiffLoc, mspecLoc, mshiLoc;
 float lightPos[3];
@@ -903,32 +903,10 @@ void display(GLFWwindow* window, double currentTime) {
 
 	mvStack.pop(); //去除旋转
 
-/*	//stage
-	setMaterialSilver();
-	mvStack.push(mvStack.top()); invTrMat = mvStack.top();
-	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(5, 30, 5));
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0, 1.93, 0.0)); invTrMat *= glm::translate(glm::mat4(1.0f), glm::vec3(0, 1.93, 0.0));
-	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
-	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
-	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(mvMat));
-	invTrMat = glm::transpose(glm::inverse(invTrMat));
-	glUniformMatrix4fv(nLoc, 1, GL_FALSE, glm::value_ptr(invTrMat));
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
-	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
-
-	glDrawArrays(GL_TRIANGLES, 0, 36); //绘制
-	mvStack.pop();
-*/
 
 	glUniform1i(flag, 1);
 	//glUniform1i(glGetUniformLocation(renderingProgram, "material1.diffuse"), 0);
-	setMaterialSilver();
+/*	setMaterialSilver();
 	//stage
 	mvStack.push(mvStack.top()); invTrMat = mvStack.top();
 	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(10, 180, 20));
@@ -1043,7 +1021,7 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindTexture(GL_TEXTURE_2D, stageTexture);
 
 	glDrawArrays(GL_TRIANGLES, 0, 36); //绘制
-	mvStack.pop();
+	mvStack.pop();*/
 
 
 
