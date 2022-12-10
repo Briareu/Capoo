@@ -16,10 +16,10 @@ using namespace std;
 #define M_PI acos(-1)
 
 #define numVAOs 2
-#define numVBOs 11//5*2+1+1+1
+#define numVBOs 11 + 1 + 1//5*2+1+1+1
 GLuint skyboxVAO, skyboxVBO;
 
-GLuint brickTexture, skyboxTexture, stageTexture;
+GLuint brickTexture, skyboxTexture, stageTexture, earthTexture, chickenTexture;
 
 GLuint renderingProgram, skyProgram;
 GLuint vao[numVAOs];
@@ -48,8 +48,9 @@ bool keys[1024];
 int num_cir1 = 0, num_cir2 = 0, num_cy = 0;
 int num_tail = 0;
 //将球横纵划分成50*50的网格
-const int Y_SEGMENTS = 50;
-const int X_SEGMENTS = 50;
+//const int Y_SEGMENTS = 50;
+//const int X_SEGMENTS = 50;
+Sphere sphere(48);
 
 float toRadians(float degrees) { return (degrees * 2.0f * 3.14159f) / 360.0f; }
 
@@ -97,6 +98,11 @@ float matAmbYellow[4] = { 1.00f,0.76f,0.18f,1.00f };
 float matDifYellow[4] = { 0.95f,1.00f,0.32f,1.00f };
 float matSpeYellow[4] = { 0.41f,0.33f,0.52f,1.00f };
 float matShiYellow = 10;
+//material yellow
+float matAmbYellow1[4] = { 0.67f,0.36f,0.56f,1.00f };
+float matDifYellow1[4] = { 0.86f,0.67f,0.42f,1.00f };
+float matSpeYellow1[4] = { 0.49f,0.62f,0.20f,1.00f };
+float matShiYellow1 = 10;
 
 void setMaterialBlue() {
 	glProgramUniform4fv(renderingProgram, mambLoc, 1, matAmbBlue);
@@ -118,6 +124,14 @@ void setMaterialYellow() {
 	glProgramUniform4fv(renderingProgram, mspecLoc, 1, matSpeYellow);
 	glProgramUniform1f(renderingProgram, mshiLoc, matShiYellow);
 }
+
+void setMaterialYellow1() {
+	glProgramUniform4fv(renderingProgram, mambLoc, 1, matAmbYellow1);
+	glProgramUniform4fv(renderingProgram, mdiffLoc, 1, matDifYellow1);
+	glProgramUniform4fv(renderingProgram, mspecLoc, 1, matSpeYellow1);
+	glProgramUniform1f(renderingProgram, mshiLoc, matShiYellow1);
+}
+
 
 void setMaterialSilver() {
 	glProgramUniform4fv(renderingProgram, mambLoc, 1, matAmbSil);
@@ -591,21 +605,48 @@ void setupVertices(void) {
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * 4, &normals[0], GL_STATIC_DRAW);
 
 	//球
-	Sphere sphere(X_SEGMENTS, Y_SEGMENTS);
-	vertices = sphere.getVertices();
-	indices = sphere.getIndices();
-	normals = sphere.getNormals();
+	vector<int> ind = sphere.getIndices();
+	vector<glm::vec3> vert = sphere.getVertices();
+	vector<glm::vec2> tex = sphere.getTexCoords();
+	vector<glm::vec3> norm = sphere.getNormals();
+	vector<float> pvalues;
+	vector<float> tvalues;
+	vector<float> nvalues;
 
+	int numIndices = sphere.getNumIndices();
+	for (int i = 0; i < numIndices; i++) {
+		pvalues.push_back((vert[ind[i]]).x);
+		pvalues.push_back((vert[ind[i]]).y);
+		pvalues.push_back((vert[ind[i]]).z);
+		tvalues.push_back((tex[ind[i]]).s);
+		tvalues.push_back((tex[ind[i]]).t);
+		nvalues.push_back((norm[ind[i]]).x);
+		nvalues.push_back((norm[ind[i]]).y);
+		nvalues.push_back((norm[ind[i]]).z);
+	}
+
+	//vertices
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, pvalues.size() * sizeof(float), &pvalues[0], GL_STATIC_DRAW);
 
-	GLuint element_buffer_object;//EBO
+	/*GLuint element_buffer_object;//EBO
 	glGenBuffers(1, &element_buffer_object);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer_object);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), &indices[0], GL_STATIC_DRAW);
-
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), &indices[0], GL_STATIC_DRAW);*/
+	vector<float> nvalues1;
+	for (int i = 0; i < nvalues.size(); i++)
+		nvalues1.push_back(-nvalues[i]);
+	//normals
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
-	glBufferData(GL_ARRAY_BUFFER, normals.size() * 4, &normals[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, nvalues.size() * 4, &nvalues[0], GL_STATIC_DRAW);
+
+	//normals
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[12]);
+	glBufferData(GL_ARRAY_BUFFER, nvalues1.size() * 4, &nvalues1[0], GL_STATIC_DRAW);
+
+	//tex
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[11]);
+	glBufferData(GL_ARRAY_BUFFER, tvalues.size() * 4, &tvalues[0], GL_STATIC_DRAW);
 
 	//圆锥
 	normals.clear();
@@ -672,6 +713,8 @@ void init(GLFWwindow* window) {
 
 	brickTexture = Utils::loadTexture("brick1.jpg");
 	stageTexture = Utils::loadTexture("stage.jpg");
+	earthTexture = Utils::loadTexture("earth.jpg");
+	chickenTexture = Utils::loadTexture("chicken.jpg");
 }
 
 void display(GLFWwindow* window, double currentTime) {
@@ -711,16 +754,17 @@ void display(GLFWwindow* window, double currentTime) {
 	invTrMat = glm::transpose(glm::inverse(rMat * tMat * mvStack.top()));
 	glUniformMatrix4fv(nLoc, 1, GL_FALSE, glm::value_ptr(invTrMat));
 	//set matAmb, matDif, matSpe, matShi
-
-	//light & sun
-	installLights(vMat);
+	
+	//chicken
+	glUniform1i(flag, 1);
 	setMaterialYellow();
 	mvStack.push(mvStack.top());
+	mvStack.top() *= rotate(glm::mat4(1.0f), (float)(1.2 * currentTime), glm::vec3(0.0, 1.0, 0.0));
 	mvStack.top() *= glm::rotate(glm::mat4(1.0f), toRadians(rotating), glm::vec3(0.0f, 1.0f, 0.0f));
 	mvStack.top() *= glm::rotate(glm::mat4(1.0f), toRadians(amt), glm::vec3(0.0f, 1.0f, 0.0f));
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(lightLoc.x + changes.x + 1.0, lightLoc.y + changes.y + 1.0, lightLoc.z + changes.z + 1.0));
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(4.0, 4.0, 0.0));
 	invTrMat = mvStack.top();
-	glUniform1i(flag, 0);
+	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(0.6, 0.6, 0.6));
 	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(mvMat));
@@ -734,10 +778,48 @@ void display(GLFWwindow* window, double currentTime) {
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-	glDrawElements(GL_TRIANGLES, X_SEGMENTS * Y_SEGMENTS * 6, GL_UNSIGNED_INT, 0); //绘制
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[11]);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(2);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, chickenTexture);
+
+	glDrawArrays(GL_TRIANGLES, 0, sphere.getNumIndices()); //绘制
+	mvStack.pop();
+	
+	//light & sun
+	glUniform1i(flag, 0);
+	installLights(vMat);
+	setMaterialYellow1();
+	mvStack.push(mvStack.top());
+	mvStack.top() *= glm::rotate(glm::mat4(1.0f), toRadians(rotating), glm::vec3(0.0f, 1.0f, 0.0f));
+	mvStack.top() *= glm::rotate(glm::mat4(1.0f), toRadians(amt), glm::vec3(0.0f, 1.0f, 0.0f));
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(lightLoc.x + changes.x - 1, lightLoc.y + changes.y-1, lightLoc.z + changes.z-1));
+	invTrMat = mvStack.top();
+	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
+	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
+	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(mvMat));
+	invTrMat = glm::transpose(glm::inverse(invTrMat));
+	glUniformMatrix4fv(nLoc, 1, GL_FALSE, glm::value_ptr(invTrMat));
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[12]);//6
+	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, earthTexture);
+
+	glDrawArrays(GL_TRIANGLES, 0, sphere.getNumIndices()); //绘制
 	mvStack.pop();
 
 
+	glUniform1i(flag, 0);
 	//绘制身体（圆柱体）
 	setMaterialBlue();
 	mvStack.push(mvStack.top());
@@ -804,7 +886,7 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
-	glDrawElements(GL_TRIANGLES, X_SEGMENTS * Y_SEGMENTS * 6, GL_UNSIGNED_INT, 0); //绘制
+	glDrawArrays(GL_TRIANGLES, 0, sphere.getNumIndices()); //绘制
 	mvStack.pop();
 
 
@@ -876,7 +958,7 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
-	glDrawElements(GL_TRIANGLES, X_SEGMENTS * Y_SEGMENTS * 6, GL_UNSIGNED_INT, 0); //绘制
+	glDrawArrays(GL_TRIANGLES, 0, sphere.getNumIndices()); //绘制
 	mvStack.pop();
 
 	//绘制眼睛（右）
@@ -898,131 +980,13 @@ void display(GLFWwindow* window, double currentTime) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
-	glDrawElements(GL_TRIANGLES, X_SEGMENTS * Y_SEGMENTS * 6, GL_UNSIGNED_INT, 0); //绘制
+	glDrawArrays(GL_TRIANGLES, 0, sphere.getNumIndices()); //绘制
 	mvStack.pop();
 
 	mvStack.pop(); //去除旋转
 
 
 	glUniform1i(flag, 1);
-	//glUniform1i(glGetUniformLocation(renderingProgram, "material1.diffuse"), 0);
-/*	setMaterialSilver();
-	//stage
-	mvStack.push(mvStack.top()); invTrMat = mvStack.top();
-	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(10, 180, 20));
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0, 1.984, 0.0)); invTrMat *= glm::translate(glm::mat4(1.0f), glm::vec3(0, 1.984, 0.0));
-	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
-	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
-	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
-	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(mvMat));
-	invTrMat = glm::transpose(glm::inverse(invTrMat));
-	glUniformMatrix4fv(nLoc, 1, GL_FALSE, glm::value_ptr(invTrMat));
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
-	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
-	glEnableVertexAttribArray(0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
-	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[10]);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(2);
-
-	//glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, stageTexture);
-
-	glDrawArrays(GL_TRIANGLES, 0, 36); //绘制
-	mvStack.pop();
-
-	//stage-down1
-	mvStack.push(mvStack.top()); invTrMat = mvStack.top();
-	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(10, 180, 20));
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0, 1.784, 0.0)); invTrMat *= glm::translate(glm::mat4(1.0f), glm::vec3(0, 1.784, 0.0));
-	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
-	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
-	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
-	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(mvMat));
-	invTrMat = glm::transpose(glm::inverse(invTrMat));
-	glUniformMatrix4fv(nLoc, 1, GL_FALSE, glm::value_ptr(invTrMat));
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
-	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
-	glEnableVertexAttribArray(0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
-	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[10]);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(2);
-
-	//glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, stageTexture);
-
-	glDrawArrays(GL_TRIANGLES, 0, 36); //绘制
-	mvStack.pop();
-
-	//stage-down2
-	mvStack.push(mvStack.top()); invTrMat = mvStack.top();
-	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(10, 180, 20));
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0, 1.584, 0.0)); invTrMat *= glm::translate(glm::mat4(1.0f), glm::vec3(0, 1.584, 0.0));
-	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
-	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
-	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
-	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(mvMat));
-	invTrMat = glm::transpose(glm::inverse(invTrMat));
-	glUniformMatrix4fv(nLoc, 1, GL_FALSE, glm::value_ptr(invTrMat));
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
-	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
-	glEnableVertexAttribArray(0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
-	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[10]);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(2);
-
-	//glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, stageTexture);
-
-	glDrawArrays(GL_TRIANGLES, 0, 36); //绘制
-	mvStack.pop();
-
-	//stage-down3
-	mvStack.push(mvStack.top()); invTrMat = mvStack.top();
-	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(10, 180, 20));
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0, 1.384, 0.0)); invTrMat *= glm::translate(glm::mat4(1.0f), glm::vec3(0, 1.384, 0.0));
-	//mvStack.top() *= rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0));
-	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
-	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
-	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(mvMat));
-	invTrMat = glm::transpose(glm::inverse(invTrMat));
-	glUniformMatrix4fv(nLoc, 1, GL_FALSE, glm::value_ptr(invTrMat));
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
-	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
-	glEnableVertexAttribArray(0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[9]);
-	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[10]);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(2);
-
-	//glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, stageTexture);
-
-	glDrawArrays(GL_TRIANGLES, 0, 36); //绘制
-	mvStack.pop();*/
-
 
 
 	setMaterialBron();
@@ -1278,11 +1242,28 @@ void do_movement()
 		rotating -= 0.1f;
 }
 
-void window_size_callback(GLFWwindow* win, int newWidth, int newHeight) {
-	aspect = (float)newWidth / (float)newHeight;
-	glViewport(0, 0, newWidth, newHeight);
+void window_size_callback(GLFWwindow* win, int w, int h) {
+	aspect = (float)w / (float)h;
+	glViewport(0, 0, w, h);
 	//pMat = glm::perspective(fov, aspect, 0.1f, 1000.0f);
 	//mvMat = glm::lookAt(glm::vec3(1.5, 0.9, 2), glm::vec3(0, 0, 0), glm::vec3(0.0, 1.0, 0));
+	if(h == 0)
+		h = 1;
+	glViewport(0, 0, w, h);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	if (w <= h)
+	{
+		glOrtho(0.0f, 300.0f, 0.0f, 300.0f * h / w, 1.0f, -1.0f);
+	}
+	else
+	{
+		glOrtho(0.0f, 300.0f * w / h, 0.0f, 300.0f, 1.0f, -1.0f);
+	}
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 }
 
 int main(void)
@@ -1294,7 +1275,7 @@ int main(void)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
-	GLFWwindow* window = glfwCreateWindow(600, 600, "Stack", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(600, 600, "Capoo", NULL, NULL);
 	glfwMakeContextCurrent(window);
 	if (glewInit() != GLEW_OK)
 	{

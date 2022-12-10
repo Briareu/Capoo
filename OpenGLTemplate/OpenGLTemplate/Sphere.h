@@ -1,26 +1,27 @@
-#pragma once
 #include <cmath>
 #include <vector>
 #include <glm\glm.hpp>
-using namespace std;
-
-#define M_PI acos(-1)
-
 class Sphere
 {
-public:
-	Sphere(int X_SEGMENTS, int Y_SEGMENTS);
-	void init();
-	vector<int> getIndices();
-	vector<float> getVertices();
-	vector<float> getNormals();
-
 private:
-	//将球横纵划分成50*50的网格
-	int Y_SEGMENTS;
-	int X_SEGMENTS;
+	int numVertices;
+	int numIndices;
+	std::vector<int> indices;
+	std::vector<glm::vec3> vertices;
+	std::vector<glm::vec2> texCoords;
+	std::vector<glm::vec3> normals;
+	std::vector<glm::vec3> tangents;
+	void init(int);
+	float toRadians(float degrees);
 
-	vector<float> sphereVertices;
-	vector<int> sphereIndices;
-	vector<float> normals;
+public:
+	Sphere();
+	Sphere(int prec);
+	int getNumVertices();
+	int getNumIndices();
+	std::vector<int> getIndices();
+	std::vector<glm::vec3> getVertices();
+	std::vector<glm::vec2> getTexCoords();
+	std::vector<glm::vec3> getNormals();
+	std::vector<glm::vec3> getTangents();
 };
