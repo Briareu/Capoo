@@ -1,2 +1,3 @@
 # Myprogram
- C++ developed by VS
+ * C++ developed by VS
+ * using openGL
